@@ -10,36 +10,39 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
-    <link rel="icon" type="image/x-icon" href="./images/logo-nobg.ico">
+    <link rel="icon" type="image/x-icon" href="./images/favicon.png">
 </head>
 
 <body>
     <header class="header">
         <nav class="nav container">
-            <div class="nav__logo">
-                <img class="logo__img" src="./images/logo-nobg.ico" alt="SchoolCore logo">
-                <span class="logo__text">SchoolCore</span>
-            </div>
-            <div class="nav__links">
+            <div class="nav__group nav__group--left nav__links">
                 <a href="#about">About</a>
                 <a href="#features">Features</a>
                 <a href="#requirements">Requirements</a>
-                <a href="#installation">Installation</a>
-                <a href="https://github.com/Mrzmiless/schoolcore-pap" target="_blank" rel="noopener">GitHub</a>
             </div>
-            <a class="nav__cta" href="https://github.com/Mrzmiless/schoolcore-pap" target="_blank" rel="noopener">
-                Get started
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M6 3L11 8L6 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-            </a>
+            <div class="nav__logo">
+                <span class="logo__text">SchoolCore</span>
+            </div>
+            <div class="nav__group nav__group--right">
+                <div class="nav__links">
+                    <a href="https://github.com/Mrzmiless/schoolcore-pap/blob/main/README.md" target="_blank" rel="noopener">Documentation</a>
+                    <a href="https://github.com/Mrzmiless/schoolcore-pap" target="_blank" rel="noopener">GitHub</a>
+                </div>
+                <a class="nav__cta" href="https://github.com/Mrzmiless/schoolcore-pap" target="_blank" rel="noopener">
+                    Get started
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M6 3L11 8L6 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </a>
+            </div>
         </nav>
     </header>
 
     <main>
         <section class="hero">
-            <div class="container hero__grid">
-                <div class="hero__content">
+            <div class="container hero__inner">
+                <div class="hero__content hero__content--center">
                     <h1 class="hero__title">
                         School management with <span class="text-gradient">full control</span> of your data
                     </h1>
@@ -54,11 +57,11 @@
                                 <path d="M7.5 4.5L12 9L7.5 13.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
                             </svg>
                         </a>
-                        <a class="btn btn--ghost" href="#installation">
+                        <a class="btn btn--ghost" href="https://github.com/Mrzmiless/schoolcore-pap/blob/main/README.md" target="_blank" rel="noopener">
                             Installation guide
                         </a>
                     </div>
-                    <div class="hero__meta">
+                    <div class="hero__meta hero__meta--center">
                         <div class="meta__item">
                             <span class="meta__value">PWA</span>
                             <span class="meta__label">Android & iOS</span>
@@ -75,73 +78,12 @@
                         </div>
                     </div>
                 </div>
-                <div class="hero__visual">
-                    <div class="visual__card">
-                        <div class="visual__header">
-                            <div class="visual__dots">
-                                <span></span>
-                                <span></span>
-                                <span></span>
-                            </div>
-                            <span class="visual__title">schoolcore.local</span>
-                        </div>
-                        <div class="visual__body">
-                            <div class="visual__line visual__line--short"></div>
-                            <div class="visual__grid">
-                                <div class="visual__tile">
-                                    <div class="tile__icon"></div>
-                                    <div class="tile__text">
-                                        <div class="tile__bar"></div>
-                                        <div class="tile__bar tile__bar--sm"></div>
-                                    </div>
-                                </div>
-                                <div class="visual__tile">
-                                    <div class="tile__icon"></div>
-                                    <div class="tile__text">
-                                        <div class="tile__bar"></div>
-                                        <div class="tile__bar tile__bar--sm"></div>
-                                    </div>
-                                </div>
-                                <div class="visual__tile">
-                                    <div class="tile__icon"></div>
-                                    <div class="tile__text">
-                                        <div class="tile__bar"></div>
-                                        <div class="tile__bar tile__bar--sm"></div>
-                                    </div>
-                                </div>
-                                <div class="visual__tile">
-                                    <div class="tile__icon"></div>
-                                    <div class="tile__text">
-                                        <div class="tile__bar"></div>
-                                        <div class="tile__bar tile__bar--sm"></div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="visual__line"></div>
-                            <div class="visual__list">
-                                <div class="list__item">
-                                    <span class="list__dot"></span>
-                                    <div class="list__bar"></div>
-                                </div>
-                                <div class="list__item">
-                                    <span class="list__dot"></span>
-                                    <div class="list__bar"></div>
-                                </div>
-                                <div class="list__item">
-                                    <span class="list__dot"></span>
-                                    <div class="list__bar"></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="visual__glow"></div>
-                </div>
             </div>
         </section>
 
-        <section id="about" class="section">
+        <section id="about" class="section reveal">
             <div class="container">
-                <div class="section__header">
+                <div class="section__header reveal__item">
                     <span class="section__eyebrow">About the project</span>
                     <h2 class="section__title">What is SchoolCore?</h2>
                     <p class="section__subtitle">
@@ -152,14 +94,14 @@
             </div>
         </section>
 
-        <section id="features" class="section section--alt">
+        <section id="features" class="section section--alt reveal">
             <div class="container">
-                <div class="section__header">
+                <div class="section__header reveal__item">
                     <span class="section__eyebrow">Features</span>
                     <h2 class="section__title">Everything you need, with no external dependencies</h2>
                 </div>
                 <div class="features__grid">
-                    <article class="feature__card">
+                    <article class="feature__card reveal__item">
                         <div class="feature__icon">
                             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="currentColor" stroke-width="1.5"/>
@@ -167,9 +109,9 @@
                             </svg>
                         </div>
                         <h3 class="feature__title">Self-hosted</h3>
-                        <p class="feature__text">Keep all school data on your own infrastructure with full control over it.</p>
+                        <p class="feature__text">Keep all school data on your own infrastructure with full control over it. No need for cloud storage.</p>
                     </article>
-                    <article class="feature__card">
+                    <article class="feature__card reveal__item">
                         <div class="feature__icon">
                             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <rect x="5" y="2" width="14" height="20" rx="2" stroke="currentColor" stroke-width="1.5"/>
@@ -177,9 +119,9 @@
                             </svg>
                         </div>
                         <h3 class="feature__title">PWA Support</h3>
-                        <p class="feature__text">Students and teachers can access it via web or install it as an app on Android and iOS, with no App Store or Google Play required.</p>
+                        <p class="feature__text">Students and teachers can access it via WebApp, install it as an app on Android and iOS, with no App Store or Google Play required.</p>
                     </article>
-                    <article class="feature__card">
+                    <article class="feature__card reveal__item">
                         <div class="feature__icon">
                             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <path d="M12 6V12L16 14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
@@ -193,14 +135,14 @@
             </div>
         </section>
 
-        <section id="requirements" class="section">
+        <section id="requirements" class="section reveal">
             <div class="container">
-                <div class="section__header">
+                <div class="section__header reveal__item">
                     <span class="section__eyebrow">Server requirements</span>
                     <h2 class="section__title">Minimum and recommended requirements</h2>
                     <p class="section__subtitle">Currently only tested on Ubuntu Server.</p>
                 </div>
-                <div class="table__wrapper">
+                <div class="table__wrapper reveal__item">
                     <table class="requirements__table">
                         <thead>
                             <tr>
@@ -241,58 +183,11 @@
             </div>
         </section>
 
-        <section id="installation" class="section section--alt">
-            <div class="container">
-                <div class="section__header">
-                    <span class="section__eyebrow">Installation</span>
-                    <h2 class="section__title">Get started in a few steps</h2>
-                    <p class="section__subtitle">Follow this guide on your Ubuntu Server to get SchoolCore up and running.</p>
-                </div>
-                <div class="steps__grid">
-                    <article class="step__card">
-                        <div class="step__number">01</div>
-                        <h3 class="step__title">Prepare the server</h3>
-                        <p class="step__text">Connect via SSH, become root, and update the system.</p>
-                        <div class="code__block">
-                            <code>sudo su<br>apt update && apt upgrade -y<br>reboot</code>
-                        </div>
-                    </article>
-                    <article class="step__card">
-                        <div class="step__number">02</div>
-                        <h3 class="step__title">Install dependencies</h3>
-                        <p class="step__text">After reboot, install git, python3, nodejs, and npm.</p>
-                        <div class="code__block">
-                            <code>sudo su<br>apt install -y git python3 nodejs npm</code>
-                        </div>
-                    </article>
-                    <article class="step__card">
-                        <div class="step__number">03</div>
-                        <h3 class="step__title">Clone the repository</h3>
-                        <p class="step__text">Clone the repository and enter the project directory.</p>
-                        <div class="code__block">
-                            <code>git clone https://github.com/Mrzmiless/schoolcore-pap.git<br>cd schoolcore-pap</code>
-                        </div>
-                    </article>
-                    <article class="step__card step__card--cta">
-                        <div class="step__number">04</div>
-                        <h3 class="step__title">Configure and run</h3>
-                        <p class="step__text">Check the README on GitHub for the most up-to-date configuration and startup instructions.</p>
-                        <a class="btn btn--primary btn--full" href="https://github.com/Mrzmiless/schoolcore-pap" target="_blank" rel="noopener">
-                            Go to GitHub to get started
-                            <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M7.5 4.5L12 9L7.5 13.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                            </svg>
-                        </a>
-                    </article>
-                </div>
-            </div>
-        </section>
-
-        <section class="cta">
-            <div class="container cta__inner">
+        <section class="cta reveal">
+            <div class="container cta__inner reveal__item">
                 <div class="cta__content">
                     <h2 class="cta__title">Ready to get started?</h2>
-                    <p class="cta__subtitle">Grab the code, host it on your server, and run SchoolCore your way.</p>
+                    <p class="cta__subtitle">Clone the repo, host it on your server, and run SchoolCore your way.</p>
                 </div>
                 <a class="btn btn--primary btn--large" href="https://github.com/Mrzmiless/schoolcore-pap" target="_blank" rel="noopener">
                     Go to GitHub and start installing
@@ -308,7 +203,6 @@
         <div class="container footer__inner">
             <div class="footer__brand">
                 <div class="nav__logo">
-                    <img class="logo__img" src="./images/logo-nobg.ico" alt="SchoolCore logo">
                     <span class="logo__text">SchoolCore</span>
                 </div>
                 <p class="footer__text">Open-source, self-hosted school management system.</p>
@@ -323,6 +217,28 @@
             <p>© 2026 SchoolCore. Built for schools.</p>
         </div>
     </footer>
+    <script>
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach((entry) => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('is-visible');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, {
+            threshold: 0.12,
+            rootMargin: '0px 0px -40px 0px'
+        });
+
+        document.querySelectorAll('.reveal').forEach((section) => {
+            section.classList.add('reveal-init');
+            observer.observe(section);
+        });
+
+        document.querySelectorAll('.reveal__item').forEach((item, index) => {
+            item.style.transitionDelay = `${Math.min(index * 80, 320)}ms`;
+        });
+    </script>
 </body>
 
 </html>

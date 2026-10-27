@@ -56,17 +56,34 @@ a {
 }
 
 .nav {
-    display: flex;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
     align-items: center;
-    justify-content: space-between;
     gap: 24px;
     padding: 16px 0;
+}
+
+.nav__group {
+    display: flex;
+    align-items: center;
+    gap: 28px;
+    font-size: 15px;
+    color: var(--text-secondary);
+}
+
+.nav__group--left {
+    justify-content: flex-start;
+}
+
+.nav__group--right {
+    justify-content: flex-end;
 }
 
 .nav__logo {
     display: flex;
     align-items: center;
     gap: 12px;
+    justify-self: center;
 }
 
 .logo__img {
@@ -78,14 +95,6 @@ a {
 .logo__text {
     font-weight: 600;
     letter-spacing: -0.01em;
-}
-
-.nav__links {
-    display: flex;
-    align-items: center;
-    gap: 28px;
-    font-size: 15px;
-    color: var(--text-secondary);
 }
 
 .nav__links a {
@@ -131,16 +140,54 @@ a {
     background: rgba(255, 255, 255, 0.02);
 }
 
+@media (max-width: 880px) {
+    .nav {
+        grid-template-columns: 1fr auto;
+    }
+
+    .nav__group--left,
+    .nav__group--right .nav__links {
+        display: none;
+    }
+
+    .nav__logo {
+        justify-self: start;
+    }
+
+    .nav__group--right {
+        justify-self: end;
+    }
+}
+
 .hero {
-    padding: clamp(80px, 12vw, 140px) 0 clamp(60px, 10vw, 120px);
+    padding: clamp(100px, 14vw, 160px) 0 clamp(80px, 12vw, 140px);
     animation: fade-up 700ms ease both;
 }
 
-.hero__grid {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: clamp(40px, 10vw, 80px);
+.hero__inner {
+    display: flex;
+    justify-content: center;
+    text-align: center;
+}
+
+.hero__content--center {
+    display: flex;
+    flex-direction: column;
     align-items: center;
+    max-width: 880px;
+}
+
+.hero__content--center .hero__subtitle {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.hero__content--center .hero__actions {
+    justify-content: center;
+}
+
+.hero__meta--center {
+    justify-content: center;
 }
 
 .hero__badge {
@@ -163,10 +210,11 @@ a {
 }
 
 .hero__title {
-    font-size: clamp(42px, 8vw, 72px);
-    line-height: 1.02;
-    letter-spacing: -0.06em;
+    font-size: clamp(42px, 8vw, 76px);
+    line-height: 1.01;
+    letter-spacing: -0.07em;
     margin-bottom: 20px;
+    animation: fade-up 700ms ease both;
 }
 
 .text-gradient {
@@ -176,8 +224,10 @@ a {
 .hero__subtitle {
     color: var(--text-secondary);
     font-size: clamp(18px, 2vw, 20px);
-    max-width: 580px;
+    max-width: 640px;
     margin-bottom: 32px;
+    animation: fade-up 700ms ease both;
+    animation-delay: 80ms;
 }
 
 .hero__actions {
@@ -185,6 +235,8 @@ a {
     flex-wrap: wrap;
     gap: 16px;
     margin-bottom: 40px;
+    animation: fade-up 700ms ease both;
+    animation-delay: 160ms;
 }
 
 .btn {
@@ -203,13 +255,15 @@ a {
 }
 
 .btn--primary {
-    background: var(--accent);
+    background: linear-gradient(90deg, #ffffff 0%, #f3f4f6 50%, #ffffff 100%);
+    background-size: 200% 100%;
     color: #0b0b0f;
     border: 1px solid transparent;
+    animation: shimmer 4s linear infinite;
 }
 
 .btn--primary:hover {
-    filter: brightness(0.95);
+    filter: brightness(0.98);
 }
 
 .btn--ghost {
@@ -239,6 +293,8 @@ a {
     align-items: center;
     gap: 24px;
     color: var(--text-secondary);
+    animation: fade-up 700ms ease both;
+    animation-delay: 240ms;
 }
 
 .meta__item {
@@ -687,8 +743,21 @@ a {
 }
 
 @media (max-width: 880px) {
-    .nav__links {
+    .nav {
+        grid-template-columns: 1fr auto;
+    }
+
+    .nav__group--left,
+    .nav__group--right .nav__links {
         display: none;
+    }
+
+    .nav__logo {
+        justify-self: start;
+    }
+
+    .nav__group--right {
+        justify-self: end;
     }
 }
 
@@ -711,6 +780,32 @@ a {
     50% {
         transform: translateY(-8px);
     }
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: -200% 0;
+    }
+    100% {
+        background-position: 200% 0;
+    }
+}
+
+.btn--primary {
+    background: linear-gradient(90deg, #ffffff 0%, #f3f4f6 50%, #ffffff 100%);
+    background-size: 200% 100%;
+    animation: shimmer 4s linear infinite;
+}
+
+.reveal-init .reveal__item {
+    opacity: 0;
+    transform: translateY(16px);
+    transition: opacity 700ms ease, transform 700ms ease;
+}
+
+.reveal.is-visible .reveal__item {
+    opacity: 1;
+    transform: translateY(0);
 }
 
 @media (max-width: 720px) {

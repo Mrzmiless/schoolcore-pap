@@ -51,14 +51,58 @@ sudo su
 apt install -y git python3 nodejs npm
 ```
 
-### 3. Clone the repository
+### 3. Install docker
+
+> This is the official docker installation process
+Before installing docker let's remove any kind of file that might interfere with the installation
 
 ```bash
-git clone https://github.com/<your-username>/schoolcore-pap.git
+sudo apt remove $(dpkg --get-selections docker.io docker-compose docker-compose-v2 docker-doc docker-buildx podman-docker containerd runc | cut -f1)
+```
+
+#### 3.2 Setup docker apt repo's
+
+```bash
+# Add Docker's official GPG key:
+sudo apt update
+sudo apt install ca-certificates curl
+sudo install -m 0755 -d /etc/apt/keyrings
+sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+sudo chmod a+r /etc/apt/keyrings/docker.asc
+
+# Add the repository to Apt sources:
+sudo tee /etc/apt/sources.list.d/docker.sources <<EOF
+Types: deb
+URIs: https://download.docker.com/linux/ubuntu
+Suites: $(. /etc/os-release && echo "${UBUNTU_CODENAME:-$VERSION_CODENAME}")
+Components: stable
+Architectures: $(dpkg --print-architecture)
+Signed-By: /etc/apt/keyrings/docker.asc
+EOF
+
+sudo apt update
+```
+
+#### 3.3 Install docker
+
+```bash
+sudo apt install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+```
+
+#### 3.4 Make sure docker is working (optional)
+
+```bash
+sudo docker run hello-world
+```
+
+### 4. Clone the repository
+
+```bash
+git clone https://github.com/Mrzmiless/schoolcore-pap.git
 cd schoolcore-pap
 ```
 
-### 4. Finish setup
+### 5. Finish setup
 
 *Additional setup instructions will be added as the project evolves.*
 
