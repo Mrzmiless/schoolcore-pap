@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="pt">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SchoolCore</title>
+    <meta name="description" content="SchoolCore é um sistema de gestão escolar open-source, self-hosted e com suporte PWA.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" type="image" href="./images/logo-nobg.ico">
+</head>
+
+<body>
+    <header class="header">
+        <nav class="nav container">
+            <div class="nav__logo">
+                <span class="logo__mark">S</span>
+                <span class="logo__text">SchoolCore</span>
+            </div>
+            <div class="nav__links">
+                <a href="#sobre">Sobre</a>
+                <a href="#funcionalidades">Funcionalidades</a>
+                <a href="#requisitos">Requisitos</a>
+                <a href="#instalacao">Instalação</a>
+                <a href="https://github.com/Mrzmiless/schoolcore-pap" target="_blank" rel="noopener">GitHub</a>
+            </div>
+            <a class="nav__cta" href="https://github.com/Mrzmiless/schoolcore-pap" target="_blank" rel="noopener">
+                Começar instalação
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M6 3L11 8L6 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </a>
+        </nav>
+    </header>
+
+    <main>
+        <section class="hero">
+            <div class="container hero__grid">
+                <div class="hero__content">
+                    <h1 class="hero__title">
+                        Gestão escolar com <span class="text-gradient">total controlo</span> dos teus dados
+                    </h1>
+                    <p class="hero__subtitle">
+                        O SchoolCore é um sistema de gestão escolar open-source, self-hosted e pensado para equipas de TI das escolas. 
+                        Simples de instalar, rápido e com acesso via PWA em Android e iOS.
+                    </p>
+                    <div class="hero__actions">
+                        <a class="btn btn--primary" href="https://github.com/Mrzmiless/schoolcore-pap" target="_blank" rel="noopener">
+                            Ver no GitHub
+                            <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M7.5 4.5L12 9L7.5 13.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </a>
+                        <a class="btn btn--ghost" href="#instalacao">
+                            Guia de instalação
+                        </a>
+                    </div>
+                    <div class="hero__meta">
+                        <div class="meta__item">
+                            <span class="meta__value">PWA</span>
+                            <span class="meta__label">Android & iOS</span>
+                        </div>
+                        <div class="meta__divider"></div>
+                        <div class="meta__item">
+                            <span class="meta__value">Ubuntu Server</span>
+                            <span class="meta__label">Testado e suportado</span>
+                        </div>
+                        <div class="meta__divider"></div>
+                        <div class="meta__item">
+                            <span class="meta__value">Self-hosted</span>
+                            <span class="meta__label">100% dos teus dados</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="hero__visual">
+                    <div class="visual__card">
+                        <div class="visual__header">
+                            <div class="visual__dots">
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                            </div>
+                            <span class="visual__title">schoolcore.local</span>
+                        </div>
+                        <div class="visual__body">
+                            <div class="visual__line visual__line--short"></div>
+                            <div class="visual__grid">
+                                <div class="visual__tile">
+                                    <div class="tile__icon"></div>
+                                    <div class="tile__text">
+                                        <div class="tile__bar"></div>
+                                        <div class="tile__bar tile__bar--sm"></div>
+                                    </div>
+                                </div>
+                                <div class="visual__tile">
+                                    <div class="tile__icon"></div>
+                                    <div class="tile__text">
+                                        <div class="tile__bar"></div>
+                                        <div class="tile__bar tile__bar--sm"></div>
+                                    </div>
+                                </div>
+                                <div class="visual__tile">
+                                    <div class="tile__icon"></div>
+                                    <div class="tile__text">
+                                        <div class="tile__bar"></div>
+                                        <div class="tile__bar tile__bar--sm"></div>
+                                    </div>
+                                </div>
+                                <div class="visual__tile">
+                                    <div class="tile__icon"></div>
+                                    <div class="tile__text">
+                                        <div class="tile__bar"></div>
+                                        <div class="tile__bar tile__bar--sm"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="visual__line"></div>
+                            <div class="visual__list">
+                                <div class="list__item">
+                                    <span class="list__dot"></span>
+                                    <div class="list__bar"></div>
+                                </div>
+                                <div class="list__item">
+                                    <span class="list__dot"></span>
+                                    <div class="list__bar"></div>
+                                </div>
+                                <div class="list__item">
+                                    <span class="list__dot"></span>
+                                    <div class="list__bar"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="visual__glow"></div>
+                </div>
+            </div>
+        </section>
+
+        <section id="sobre" class="section">
+            <div class="container">
+                <div class="section__header">
+                    <span class="section__eyebrow">Sobre o projeto</span>
+                    <h2 class="section__title">O que é o SchoolCore?</h2>
+                    <p class="section__subtitle">
+                        O SchoolCore foi criado para ajudar escolas a ter mais funcionalidades sem grandes alterações na infraestrutura.
+                        Fácil de instalar, utilizar e manter pela tua própria equipa de TI.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <section id="funcionalidades" class="section section--alt">
+            <div class="container">
+                <div class="section__header">
+                    <span class="section__eyebrow">Funcionalidades</span>
+                    <h2 class="section__title">Tudo o que precisas, sem dependências externas</h2>
+                </div>
+                <div class="features__grid">
+                    <article class="feature__card">
+                        <div class="feature__icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="currentColor" stroke-width="1.5"/>
+                                <path d="M7.5 12L10.5 15L16.5 9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </div>
+                        <h3 class="feature__title">Self-hosted</h3>
+                        <p class="feature__text">Mantém todos os dados da escola na tua própria infraestrutura, com controlo total sobre eles.</p>
+                    </article>
+                    <article class="feature__card">
+                        <div class="feature__icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <rect x="5" y="2" width="14" height="20" rx="2" stroke="currentColor" stroke-width="1.5"/>
+                                <circle cx="12" cy="18" r="1" fill="currentColor"/>
+                            </svg>
+                        </div>
+                        <h3 class="feature__title">Suporte PWA</h3>
+                        <p class="feature__text">Alunos e docentes podem aceder pela web ou instalar como app no Android e iOS, sem App Store ou Google Play.</p>
+                    </article>
+                    <article class="feature__card">
+                        <div class="feature__icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12 6V12L16 14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.5"/>
+                            </svg>
+                        </div>
+                        <h3 class="feature__title">Fácil de instalar</h3>
+                        <p class="feature__text">Pensado para equipas de TI escolares. Segue o guia passo a passo e coloca-o a funcionar rapidamente.</p>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <section id="requisitos" class="section">
+            <div class="container">
+                <div class="section__header">
+                    <span class="section__eyebrow">Requisitos do servidor</span>
+                    <h2 class="section__title">Requisitos mínimos e recomendados</h2>
+                    <p class="section__subtitle">Atualmente testado apenas em Ubuntu Server.</p>
+                </div>
+                <div class="table__wrapper">
+                    <table class="requirements__table">
+                        <thead>
+                            <tr>
+                                <th>Componente</th>
+                                <th>Mínimo</th>
+                                <th>Recomendado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>CPU</td>
+                                <td>x86_64, 4 cores</td>
+                                <td>x86_64, 6+ cores @ 3.0 GHz ou superior</td>
+                            </tr>
+                            <tr>
+                                <td>RAM</td>
+                                <td>16 GB</td>
+                                <td>32 GB+</td>
+                            </tr>
+                            <tr>
+                                <td>Armazenamento</td>
+                                <td>10 GB</td>
+                                <td>20 GB+ (SSD fortemente recomendado)</td>
+                            </tr>
+                            <tr>
+                                <td>GPU</td>
+                                <td>Não necessário</td>
+                                <td>Apenas se utilizar módulo de encoding de média</td>
+                            </tr>
+                            <tr>
+                                <td>Sistema Operativo</td>
+                                <td>Ubuntu Server (testado)</td>
+                                <td>Ubuntu Server (LTS)</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <section id="instalacao" class="section section--alt">
+            <div class="container">
+                <div class="section__header">
+                    <span class="section__eyebrow">Instalação</span>
+                    <h2 class="section__title">Começa em poucos passos</h2>
+                    <p class="section__subtitle">Segue este guia no teu servidor Ubuntu Server para colocar o SchoolCore a funcionar.</p>
+                </div>
+                <div class="steps__grid">
+                    <article class="step__card">
+                        <div class="step__number">01</div>
+                        <h3 class="step__title">Preparar o servidor</h3>
+                        <p class="step__text">Acede por SSH, entra em root e atualiza o sistema.</p>
+                        <div class="code__block">
+                            <code>sudo su<br>apt update && apt upgrade -y<br>reboot</code>
+                        </div>
+                    </article>
+                    <article class="step__card">
+                        <div class="step__number">02</div>
+                        <h3 class="step__title">Instalar dependências</h3>
+                        <p class="step__text">Após o reboot, instala git, python3, nodejs e npm.</p>
+                        <div class="code__block">
+                            <code>sudo su<br>apt install -y git python3 nodejs npm</code>
+                        </div>
+                    </article>
+                    <article class="step__card">
+                        <div class="step__number">03</div>
+                        <h3 class="step__title">Clonar o repositório</h3>
+                        <p class="step__text">Clona o repositório e entra na diretoria do projeto.</p>
+                        <div class="code__block">
+                            <code>git clone https://github.com/Mrzmiless/schoolcore-pap.git<br>cd schoolcore-pap</code>
+                        </div>
+                    </article>
+                    <article class="step__card step__card--cta">
+                        <div class="step__number">04</div>
+                        <h3 class="step__title">Configurar e executar</h3>
+                        <p class="step__text">Consulta o README no GitHub para as instruções mais atualizadas de configuração e arranque.</p>
+                        <a class="btn btn--primary btn--full" href="https://github.com/Mrzmiless/schoolcore-pap" target="_blank" rel="noopener">
+                            Ir para o GitHub para começar
+                            <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M7.5 4.5L12 9L7.5 13.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </a>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <section class="cta">
+            <div class="container cta__inner">
+                <div class="cta__content">
+                    <h2 class="cta__title">Pronto para começar?</h2>
+                    <p class="cta__subtitle">Pega no código, hospeda no teu servidor e tem o SchoolCore a funcionar à tua medida.</p>
+                </div>
+                <a class="btn btn--primary btn--large" href="https://github.com/Mrzmiless/schoolcore-pap" target="_blank" rel="noopener">
+                    Ir para o GitHub e começar a instalação
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M8.333 5L13.333 10L8.333 15" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </a>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="container footer__inner">
+            <div class="footer__brand">
+                <div class="nav__logo">
+                    <span class="logo__mark">S</span>
+                    <span class="logo__text">SchoolCore</span>
+                </div>
+                <p class="footer__text">Sistema escolar open-source, self-hosted.</p>
+            </div>
+            <div class="footer__links">
+                <a href="https://github.com/Mrzmiless/schoolcore-pap" target="_blank" rel="noopener">GitHub</a>
+                <a href="https://github.com/Mrzmiless/schoolcore-pap/blob/main/LICENSE" target="_blank" rel="noopener">Licença</a>
+                <a href="https://github.com/Mrzmiless/schoolcore-pap/blob/main/README.md" target="_blank" rel="noopener">README</a>
+            </div>
+        </div>
+        <div class="container footer__bottom">
+            <p>© 2026 SchoolCore. Feito com paixão para escolas.</p>
+        </div>
+    </footer>
+</body>
+
+</html>
