@@ -1,12 +1,13 @@
 # SchoolCore
 
-SchoolCore is an open-source, self-hosted school management system designed to help schools manage their day-to-day operations with more flexibility and full control over their data.
+SchoolCore is an open-source, self-hosted school management system designed to help schools manage their day-to-day operations with full control over their data.
 
 ## Features
 
 - **Self-hosted** – Keep all of your school's data on your own infrastructure.
-- **PWA Support** – Students and staff can access the platform through a web app or install it as a Progressive Web App (PWA) on Android and iOS, with no need to publish to the Google Play Store or Apple App Store.
-- **Simple to deploy** – Built with simplicity in mind for school IT teams.
+- **PWA Support** – Students and staff can access the platform as a web app or install it as a Progressive Web App (PWA) on Android and iOS, with no need for the Google Play Store or Apple App Store.
+- **Easy to deploy** – Built with simplicity in mind for school IT teams.
+- **No external dependencies required** – Runs entirely on your own server.
 
 ## Server Requirements
 
@@ -15,7 +16,7 @@ SchoolCore is an open-source, self-hosted school management system designed to h
 | CPU | x86_64, 4 cores | x86_64, 6+ cores @ 3.0 GHz or higher |
 | RAM | 16 GB | 32 GB+ |
 | Storage | 10 GB | 20 GB+ (SSD strongly recommended) |
-| GPU | Not required | Only required if using a media encoding module |
+| GPU | Not required | Only required if using the media encoding module |
 | Operating System | Ubuntu Server (tested) | Ubuntu Server (LTS) |
 
 ## Installation
@@ -51,26 +52,27 @@ sudo su
 apt install -y git python3 nodejs npm
 ```
 
-### 3. Install docker
+### 3. Install Docker
 
-> This is the official docker installation process
-Before installing docker let's remove any kind of file that might interfere with the installation
+> This follows the official Docker installation procedure for Ubuntu.
+
+#### 3.1 Remove conflicting packages
 
 ```bash
 sudo apt remove $(dpkg --get-selections docker.io docker-compose docker-compose-v2 docker-doc docker-buildx podman-docker containerd runc | cut -f1)
 ```
 
-#### 3.2 Setup docker apt repo's
+#### 3.2 Set up the Docker APT repository
 
 ```bash
-# Add Docker's official GPG key:
+# Add Docker's official GPG key
 sudo apt update
-sudo apt install ca-certificates curl
+sudo apt install -y ca-certificates curl
 sudo install -m 0755 -d /etc/apt/keyrings
 sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
 sudo chmod a+r /etc/apt/keyrings/docker.asc
 
-# Add the repository to Apt sources:
+# Add the repository to APT sources
 sudo tee /etc/apt/sources.list.d/docker.sources <<EOF
 Types: deb
 URIs: https://download.docker.com/linux/ubuntu
@@ -83,13 +85,13 @@ EOF
 sudo apt update
 ```
 
-#### 3.3 Install docker
+#### 3.3 Install Docker Engine
 
 ```bash
-sudo apt install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+sudo apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 ```
 
-#### 3.4 Make sure docker is working (optional)
+#### 3.4 Verify Docker installation (optional)
 
 ```bash
 sudo docker run hello-world

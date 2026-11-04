@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#10322D">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Minha App">
+  <meta name="description" content="Ecrã de login — A space for everyone">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=MuseoModerno:wght@400;700&display=swap" rel="stylesheet">
+  <title>Login — Minha App</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --fundo: #10322D;
+      --campo: #5F7D6A;
+      --topo: #2E493E;
+      --titulo: #C9FFDB;
+      --termos: #3E5446;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    html { min-height: 100%; background: var(--fundo); }
+    body {
+      min-width: 280px;
+      min-height: 100%;
+      margin: 0;
+      background: var(--fundo);
+      color: #fff;
+      font-family: 'MuseoModerno', 'Trebuchet MS', sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+    /* Mantém o desenho de 375 × 812, adaptando-o aos ecrãs móveis. */
+    .inicio {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      min-height: 100dvh;
+      padding: calc(101px + env(safe-area-inset-top, 0px)) 24px
+               max(30px, calc(env(safe-area-inset-bottom, 0px) + 16px));
+      background: var(--fundo);
+    }
+    .topbar {
+      position: absolute;
+      inset: 0 0 auto;
+      height: calc(92px + env(safe-area-inset-top, 0px));
+      border-radius: 0 0 15px 15px;
+      background: var(--topo);
+    }
+    .topbar__title {
+      position: absolute;
+      top: calc(30px + env(safe-area-inset-top, 0px));
+      left: 50%;
+      transform: translateX(-50%);
+      width: 121px;
+      margin: 0;
+      color: var(--titulo);
+      font-size: 20px;
+      font-weight: 700;
+      line-height: 1.35;
+      text-align: center;
+    }
+    .logo {
+      width: min(249px, 62vw);
+      aspect-ratio: 1;
+      margin-bottom: 11px;
+      background: url('../../image.png') center / cover no-repeat;
+    }
+    .login-form {
+      display: flex;
+      flex-direction: column;
+      width: min(281px, 100%);
+      flex: 1;
+    }
+    .fields {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .field { display: flex; flex-direction: column; gap: 5px; }
+    .field label {
+      padding-left: 17px;
+      font-size: 14px;
+      font-weight: 700;
+      line-height: 24px;
+    }
+    .field input {
+      display: block;
+      width: 100%;
+      height: 49px;
+      padding: 0 17px;
+      border: 2px solid transparent;
+      border-radius: 20px;
+      outline: none;
+      background: var(--campo);
+      color: #fff;
+      font: 400 16px/1.2 'MuseoModerno', 'Trebuchet MS', sans-serif;
+      appearance: none;
+      -webkit-appearance: none;
+    }
+    .field input::placeholder { color: rgba(255,255,255,.65); }
+    .field input:focus-visible { border-color: #C9FFDB; }
+    .termos {
+      max-height: 161px;
+      margin-top: 22px;
+      padding: 14px 15px;
+      overflow-y: auto;
+      border-radius: 20px;
+      background: var(--termos);
+      font-size: 12px;
+      line-height: 1.55;
+      overscroll-behavior: contain;
+    }
+    .termos__title {
+      margin: 0 0 6px;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--titulo);
+    }
+    .termos p { margin: 0; }
+    .login-status {
+      margin: 12px 0 0;
+      color: var(--titulo);
+      font-size: 12px;
+      text-align: center;
+      line-height: 1.5;
+    }
+    .login-status:empty { display: none; }
+    .loginbutton {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: min(234px, 100%);
+      height: 49px;
+      margin: auto auto 0;
+      padding: 0 12px;
+      border: 0;
+      border-radius: 20px;
+      background: var(--campo);
+      color: #fff;
+      font: 700 14px/1.2 'MuseoModerno', 'Trebuchet MS', sans-serif;
+      cursor: pointer;
+    }
+    .loginbutton:focus-visible { outline: 3px solid white; outline-offset: 3px; }
+    .loginbutton:active { filter: brightness(1.12); }
+    @media (prefers-reduced-motion: no-preference) {
+      .loginbutton { transition: filter 120ms ease; }
+    }
+  </style>
+</head>
+<body>
+  <main class="inicio">
+    <header class="topbar">
+      <h1 class="topbar__title">Login</h1>
+    </header>
+
+    <div class="logo" role="img" aria-label="Logótipo da aplicação"></div>
+
+    <form class="login-form" id="login-form">
+      <div class="fields">
+        <div class="field">
+          <label for="username">Nome de usuário</label>
+          <input id="username" name="username" type="text" autocomplete="username" required>
+        </div>
+        <div class="field">
+          <label for="password">Password</label>
+          <input id="password" name="password" type="password" autocomplete="current-password" required>
+        </div>
+      </div>
+
+      <section class="termos" aria-labelledby="termos-title" tabindex="0">
+        <h2 class="termos__title" id="termos-title">Termos e condições</h2>
+        <p>
+          Ao iniciares sessão declaras que os dados introduzidos são teus e que aceitas
+          a utilização responsável da aplicação. O acesso é pessoal e intransmissível,
+          pelo que não deves partilhar as tuas credenciais com terceiros. O uso indevido
+          da conta pode resultar na suspensão do acesso. Os dados são tratados apenas
+          para efeitos de autenticação e gestão da conta.
+        </p>
+      </section>
+
+      <p class="login-status" id="login-status" role="status" aria-live="polite"></p>
+
+      <button class="loginbutton" type="submit">Login</button>
+    </form>
+  </main>
+  <script>
+    // Este ecrã contém apenas a interface. É necessário um servidor/API para autenticar utilizadores.
+    document.getElementById('login-form').addEventListener('submit', (event) => {
+      event.preventDefault();
+      document.getElementById('login-status').textContent =
+        'Ecrã de login pronto. Falta ligar a autenticação ao servidor.';
+    });
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').catch(console.error);
+      });
+    }
+  </script>
+</body>
+</html>

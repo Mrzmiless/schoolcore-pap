@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#10322D">
+  <meta name="description" content="A space for everyone">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Minha App">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png">
+  <link rel="icon" type="image/png" href="./icons/icon-192.png">
+  <!-- A letra MuseoModerno é carregada da Google Fonts quando houver Internet. -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=MuseoModerno:wght@700&display=swap" rel="stylesheet">
+  <title>ShoolCore App</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --fundo: #10322D;
+      --botao: #597D6E;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+    html { height: 100%; background: var(--fundo); }
+    body {
+      margin: 0;
+      min-height: 100%;
+      overflow: hidden;
+      background: var(--fundo);
+      font-family: 'MuseoModerno', 'Trebuchet MS', sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    /* Ecrã de entrada, adaptável a diferentes telemóveis. */
+    .group-1 {
+      position: relative;
+      width: 100%;
+      height: 100vh;
+      height: 100dvh;
+      min-height: 260px;
+      overflow: hidden;
+      background: var(--fundo);
+    }
+
+    .app {
+      position: absolute;
+      inset: 0;
+      background: var(--fundo);
+    }
+
+    /* No modelo 375 x 812, a imagem começa a 182 px e mede 375 x 375. */
+    .logo {
+      position: absolute;
+      top: 22.4138%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: min(100vw, 46.1823dvh, 375px);
+      aspect-ratio: 1 / 1;
+      background: url('./image.png') center / cover no-repeat;
+    }
+
+    .text-2 {
+      position: absolute;
+      top: 75.2%;
+      left: 50%;
+      width: min(90%, 244px);
+      transform: translateX(-50%);
+      margin: 0;
+      color: #fff;
+      font-size: 18px;
+      font-weight: 700;
+      line-height: 1.4;
+      text-align: center;
+    }
+
+    /* No modelo 375 x 812, o botão fica a 45 px da margem inferior. */
+    .continuar {
+      position: absolute;
+      left: 50%;
+      bottom: max(5.54dvh, calc(env(safe-area-inset-bottom, 0px) + 16px));
+      transform: translateX(-50%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: min(256px, calc(100% - 48px));
+      height: 49px;
+      border: #597D6E;
+      border-radius: 25px;
+      background: var(--botao);
+      color: #fff;
+      font: 700 18px/1.2 'MuseoModerno', 'Trebuchet MS', sans-serif;
+      text-align: center;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    .continuar:focus-visible {
+      outline: 3px solid white;
+      outline-offset: 4px;
+    }
+
+    .continuar:active { filter: brightness(1.12); }
+
+    @media (max-height: 440px) {
+      .logo { top: 10%; width: min(60dvh, 240px); }
+      .continuar { bottom: max(10px, env(safe-area-inset-bottom, 0px)); }
+    }
+  </style>
+</head>
+<body>
+  <main class="group-1" aria-label="Ecrã inicial">
+    <div class="app" aria-hidden="true"></div>
+    <div class="logo">
+      <p class="text-2">A space for everyone</p>
+    </div>
+    <!-- Substitui ./inicio.html pelo destino real do botão quando estiver pronto. -->
+    <a class="continuar" href="./pages/start/index.html">Continuar</a>
+  </main>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').catch(console.error);
+      });
+    }
+  </script>
+</body>
+</html>
