@@ -217,7 +217,9 @@ By logging in, you declare that the information provided is yours and that you a
           const data = await response.json().catch(() => ({}));
           errorMessage = response.status === 403 && data.detail === 'account_disabled'
             ? 'Your account is now disabled, please talk to your school support'
-            : response.status === 401 ? 'Incorrect username or password.' : 'Could not sign in. Please try again.';
+            : response.status === 401 ? 'Incorrect username or password.'
+            : response.status === 429 ? 'Too many attempts. Please wait a few minutes and try again.'
+            : 'Could not sign in. Please try again.';
         }
       } catch (error) {
         errorMessage = 'Could not reach the server. Please try again.';

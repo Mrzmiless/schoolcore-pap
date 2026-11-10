@@ -16,10 +16,11 @@ from fastapi.responses import FileResponse, RedirectResponse
 from pydantic import BaseModel, Field
 from pymongo import MongoClient
 from pymongo.errors import DuplicateKeyError, PyMongoError
+from security import check_login_rate
 
 BASE = Path(__file__).resolve().parent
 load_dotenv(BASE / '.env')
-client = MongoClient(os.getenv('MONGODB_URI', 'mongodb://admin:papbuefixe@192.168.1.98:27017/?authSource=admin&directConnection=true'), serverSelectionTimeoutMS=3000)
+client = MongoClient(os.getenv('MONGODB_URI', 'mongodb://localhost:27017/'), serverSelectionTimeoutMS=3000)
 db = client[os.getenv('MONGODB_DATABASE', 'schoolcore')]
 hasher = PasswordHasher()
 app = FastAPI(title='SchoolCore', docs_url=None, redoc_url=None, openapi_url=None)
@@ -32,6 +33,26 @@ ROLES = {'aluno', 'professor', 'admin'}
 def ensure_indexes():
     db.users.create_index('username', unique=True)
     db.sessions.create_index('expires_at', expireAfterSeconds=0)
+    db.login_rate_limits.create_index('expires_at', expireAfterSeconds=0)
+
+
+@app.middleware('http')
+async def security_headers(request: Request, call_next):
+    response = await call_next(request)
+    response.headers['X-Content-Type-Options'] = 'nosniff'
+    response.headers['X-Frame-Options'] = 'SAMEORIGIN'
+    response.headers['Referrer-Policy'] = 'no-referrer'
+    response.headers['Permissions-Policy'] = 'camera=(), microphone=(), geolocation=()'
+    response.headers['Content-Security-Policy'] = (
+        "default-src 'self'; script-src 'self' 'unsafe-inline'; "
+        "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
+        "font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; "
+        "connect-src 'self'; frame-src 'self'; object-src 'none'; "
+        "base-uri 'self'; frame-ancestors 'self'; form-action 'self'"
+    )
+    if request.url.path.startswith('/api/'):
+        response.headers['Cache-Control'] = 'no-store'
+    return response
 
 
 class Credentials(BaseModel):
@@ -74,6 +95,9 @@ def require_same_origin(request: Request):
 def login(credentials: Credentials, request: Request, response: Response):
     require_same_origin(request)
     try:
+        allowed, retry_after = check_login_rate(db.login_rate_limits, request.client.host if request.client else 'unknown')
+        if not allowed:
+            raise HTTPException(429, 'Too many login attempts', headers={'Retry-After': str(retry_after)})
         user = db.users.find_one({'username': credentials.username.strip()})
         if not user:
             raise HTTPException(401, 'Invalid credentials')
@@ -216,7 +240,8 @@ def main():
             parser.error('Não foi possível ligar ao MongoDB.')
         try:
             uvicorn.run(app, host=os.getenv('HOST', '127.0.0.1'),
-                        port=int(os.getenv('PORT', '8080')), timeout_graceful_shutdown=5)
+                        port=int(os.getenv('PORT', '8080')), timeout_graceful_shutdown=5,
+                        proxy_headers=False)
         finally:
             client.close()
 

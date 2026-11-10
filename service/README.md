@@ -26,4 +26,17 @@ Contas antigas sem perfil ou estado são tratadas como alunos ativos; sem a marc
 
 ## Produção
 
-Esta é uma base de desenvolvimento, **não pronta para produção**. Antes de usar dados reais, configura HTTPS, `COOKIE_SECURE=true`, `APP_ORIGIN` com a origem HTTPS pública e MongoDB com autenticação e acesso restrito. É necessário também implementar limitação de tentativas de login partilhada entre workers, políticas de conta, recuperação de password, auditoria, backups e testes de segurança e carga. Não exponhas o MongoDB publicamente. As novas sessões são guardadas no MongoDB e expiram 30 dias após o login; `GET /api/me` consulta a sessão e `POST /api/logout` termina-a.
+Esta é uma base de desenvolvimento, **não pronta para produção**. Antes de usar dados reais, configura HTTPS, `COOKIE_SECURE=true`, `APP_ORIGIN` com a origem HTTPS pública e MongoDB com autenticação e acesso restrito. Não exponhas o MongoDB publicamente. As novas sessões são guardadas no MongoDB e expiram 30 dias após o login; `GET /api/me` consulta a sessão e `POST /api/logout` termina-a.
+
+O login limita pedidos por endereço IP a 15 por janela fixa de 5 minutos, partilhados entre processos através do MongoDB. Isto inclui pedidos com sucesso; utilizadores atrás do mesmo IP partilham o limite. A proteção não impede ataques distribuídos nem substitui limitação no proxy/firewall. O servidor não confia em cabeçalhos de IP enviados pelo cliente; atrás de um proxy todos os pedidos poderão contar como o mesmo IP. Configura limitação por IP no proxy de confiança antes de colocar o serviço em produção.
+
+Uma credencial MongoDB esteve anteriormente no código e no histórico Git: **altera-a/revoga-a** e atualiza `MONGODB_URI` no `.env`. Remover a credencial do código não a remove do histórico. Por opção da aplicação, o login revela se um username pertence a uma conta desativada; isto facilita a enumeração de contas.
+
+Faltam ainda políticas de conta, recuperação de password, auditoria, backups, testes de segurança e carga e uma política CSP mais restritiva (atualmente são necessários scripts e estilos inline). Usa HTTPS também entre o proxy e o serviço quando apropriado. A instalação PWA e sessões persistentes dependem do navegador e das suas configurações.
+
+## Testes
+
+```bash
+pip install -r requirements-test.txt
+python -m unittest discover -s tests
+```

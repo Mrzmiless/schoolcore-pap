@@ -1,5 +1,5 @@
 
-const CACHE_NAME = "minha-pwa-v9";
+const CACHE_NAME = "minha-pwa-v10";
 
 const FILES = [
   "./",
@@ -38,6 +38,7 @@ self.addEventListener("activate", event => {
 self.addEventListener("fetch", event => {
   if (event.request.method !== "GET") return;
   if (new URL(event.request.url).origin !== self.location.origin) return;
+  if (new URL(event.request.url).pathname.startsWith('/api/')) return;
 
   event.respondWith(
     caches.match(event.request).then(cached => {
