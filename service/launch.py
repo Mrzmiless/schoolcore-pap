@@ -123,8 +123,12 @@ def login(credentials: Credentials, request: Request, response: Response):
 def me(request: Request, response: Response):
     user = current_user(request)
     response.headers['Cache-Control'] = 'no-store'
-    return {'username': user['username'], 'first_name': user.get('first_name', ''),
-            'role': user.get('role', 'aluno'),
+    return {'id': str(user['_id']), 'username': user['username'],
+            'first_name': user.get('first_name', ''), 'last_name': user.get('last_name', ''),
+            'email': user.get('email'), 'phone_number': user.get('phone_number'),
+            'grade': user.get('grade'), 'class': user.get('class'),
+            'date_of_birth': user.get('date_of_birth'), 'created_at': user.get('created_at'),
+            'role': user.get('role', 'aluno'), 'is_active': user.get('is_active', True),
             'is_first_login_done': user.get('is_first_login_done') is True}
 
 
@@ -208,6 +212,17 @@ def main():
         username = input('Username: ').strip()
         first_name = input('Primeiro nome: ').strip()
         last_name = input('Apelido: ').strip()
+        email = input('Email (opcional): ').strip()
+        phone_number = input('Telefone (opcional): ').strip()
+        grade_text = input('Ano escolar, em número (opcional): ').strip()
+        school_class = input('Turma (opcional): ').strip()
+        if grade_text and (not grade_text.isascii() or not grade_text.isdigit() or not 1 <= int(grade_text) <= 99):
+            parser.error('O ano escolar tem de ser um número entre 1 e 99.')
+        grade = int(grade_text) if grade_text else None
+        if ((email and (len(email) > 254 or email.count('@') != 1 or any(c.isspace() for c in email)
+                        or not all(email.split('@'))))
+                or len(phone_number) > 30 or len(school_class) > 30):
+            parser.error('Email, telefone ou turma inválidos.')
         role = input('Perfil (aluno/professor/admin): ').strip().lower()
         date_text = input('Data de nascimento (DD/MM/AAAA): ').strip()
         try:
@@ -226,6 +241,8 @@ def main():
             ensure_indexes()
             db.users.insert_one({'username': username, 'password_hash': hasher.hash(password),
                                  'first_name': first_name, 'last_name': last_name, 'role': role,
+                                 'email': email or None, 'phone_number': phone_number or None,
+                                 'grade': grade, 'class': school_class or None,
                                  'date_of_birth': birth_date, 'is_active': True,
                                  'is_first_login_done': False, 'created_at': datetime.now(timezone.utc)})
         except DuplicateKeyError:

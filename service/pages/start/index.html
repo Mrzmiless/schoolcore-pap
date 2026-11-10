@@ -12,6 +12,10 @@
     .card { padding: 26px; border-radius: 22px; background: #173f38; }
     h1 { color: #c9ffdb; font-size: 1.6rem; }
     p, li { line-height: 1.6; }
+    .account-details { margin: 24px 0; }
+    .account-details div { padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,.15); }
+    .account-details dt { color: #c9ffdb; font-size: .85rem; font-weight: bold; }
+    .account-details dd { margin: 5px 0 0; overflow-wrap: anywhere; }
     button { border: 0; border-radius: 24px; padding: 14px 22px; background: #597d6e; color: white; font: inherit; font-weight: bold; cursor: pointer; }
     button:focus-visible { outline: 3px solid white; outline-offset: 3px; }
     button:disabled { opacity: .6; }
@@ -33,7 +37,22 @@
     </section>
     <section class="card" id="home" hidden>
       <h1 id="home-title">Welcome to SchoolCore</h1>
-      <p>The home page is under development.</p>
+      <h2>Account details</h2>
+      <dl class="account-details">
+        <div><dt>Account ID</dt><dd id="account-id"></dd></div>
+        <div><dt>Username</dt><dd id="account-username"></dd></div>
+        <div><dt>First name</dt><dd id="account-first-name"></dd></div>
+        <div><dt>Last name</dt><dd id="account-last-name"></dd></div>
+        <div><dt>Email</dt><dd id="account-email"></dd></div>
+        <div><dt>Phone number</dt><dd id="account-phone"></dd></div>
+        <div><dt>Grade</dt><dd id="account-grade"></dd></div>
+        <div><dt>Class</dt><dd id="account-class"></dd></div>
+        <div><dt>Role</dt><dd id="account-role"></dd></div>
+        <div><dt>Date of birth</dt><dd id="account-birth"></dd></div>
+        <div><dt>Account created</dt><dd id="account-created"></dd></div>
+        <div><dt>Account status</dt><dd id="account-status"></dd></div>
+        <div><dt>Introduction completed</dt><dd id="account-intro"></dd></div>
+      </dl>
       <button id="logout" type="button">Sign out</button>
     </section>
     <p id="status" role="status" aria-live="polite">Loading…</p>
@@ -45,6 +64,18 @@
     const status = document.getElementById('status');
     const complete = document.getElementById('complete');
 
+    function displayValue(id, value) {
+      document.getElementById(id).textContent = value || 'Not available';
+    }
+
+    function displayDate(value) {
+      if (!value) return 'Not available';
+      // Older accounts may store the date as DD/MM/YYYY instead of BSON date.
+      if (/^\d{2}\/\d{2}\/\d{4}$/.test(value)) return value;
+      const date = new Date(value);
+      return Number.isNaN(date.getTime()) ? 'Not available' : date.toLocaleDateString('en-GB', { timeZone: 'UTC' });
+    }
+
     async function loadUser() {
       window.schoolcoreLoading.show('Loading your account…');
       try {
@@ -55,6 +86,19 @@
         const name = user.first_name || user.username;
         document.getElementById('welcome').textContent = 'Welcome to SchoolCore, ' + name + '!';
         document.getElementById('home-title').textContent = 'Hello, ' + name + '!';
+        displayValue('account-id', user.id);
+        displayValue('account-username', user.username);
+        displayValue('account-first-name', user.first_name);
+        displayValue('account-last-name', user.last_name);
+        displayValue('account-email', user.email);
+        displayValue('account-phone', user.phone_number);
+        displayValue('account-grade', user.grade);
+        displayValue('account-class', user.class);
+        displayValue('account-role', ({ aluno: 'Student', professor: 'Teacher', admin: 'Administrator' })[user.role] || user.role);
+        displayValue('account-birth', displayDate(user.date_of_birth));
+        displayValue('account-created', displayDate(user.created_at));
+        displayValue('account-status', user.is_active ? 'Active' : 'Disabled');
+        displayValue('account-intro', user.is_first_login_done ? 'Yes' : 'No');
         intro.hidden = user.is_first_login_done;
         home.hidden = !user.is_first_login_done;
         status.textContent = '';
@@ -72,6 +116,7 @@
         const response = await fetch('../../api/onboarding/complete', { method: 'POST' });
         if (response.status === 401) { await window.schoolcoreLoading.wait(); window.location.replace('../login/index.html'); return; }
         if (!response.ok) throw new Error();
+        displayValue('account-intro', 'Yes');
         intro.hidden = true;
         home.hidden = false;
         status.textContent = '';

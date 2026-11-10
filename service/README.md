@@ -20,7 +20,7 @@ python launch.py create-user
 python launch.py serve
 ```
 
-Por defeito o servidor usa a porta 8080. O comando de criação pede username, nome, apelido, perfil, data de nascimento e password. A data é guardada como data BSON, a password como hash Argon2 e a conta começa ativa, com a introdução por concluir. Os usernames são únicos e distinguem maiúsculas de minúsculas. Para testar noutro dispositivo, configura `HOST=0.0.0.0` e `APP_ORIGIN` com o endereço exato de acesso; a instalação PWA necessita de HTTPS ou localhost.
+Por defeito o servidor usa a porta 8080. O comando de criação pede username, nome, apelido, email, telefone, ano, turma, perfil, data de nascimento e password. Email, telefone, ano e turma são opcionais; deixa a resposta vazia se não se aplicarem. O ano é guardado como número e o telefone como texto. A data é guardada como data BSON, a password como hash Argon2 e a conta começa ativa, com a introdução por concluir. Os usernames são únicos e distinguem maiúsculas de minúsculas. Para testar noutro dispositivo, configura `HOST=0.0.0.0` e `APP_ORIGIN` com o endereço exato de acesso; a instalação PWA necessita de HTTPS ou localhost.
 
 Contas antigas sem perfil ou estado são tratadas como alunos ativos; sem a marca de introdução concluída, veem-na no próximo acesso. Contas com `is_active: false` ou um perfil inválido não podem iniciar nem manter sessão. Ainda não existem funcionalidades específicas nem permissões adicionais para cada perfil, nem alteração obrigatória de password no primeiro login.
 
