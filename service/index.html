@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pt-PT">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
@@ -7,15 +7,15 @@
   <meta name="description" content="A space for everyone">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="Minha App">
+  <meta name="apple-mobile-web-app-title" content="SchoolCore">
   <link rel="manifest" href="./manifest.webmanifest">
-  <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png">
-  <link rel="icon" type="image/png" href="./icons/icon-192.png">
+  <link rel="apple-touch-icon" href="./images/Icon 192x192.png">
+  <link rel="icon" type="image/png" href="./images/Icon 192x192.png">
   <!-- A letra MuseoModerno é carregada da Google Fonts quando houver Internet. -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=MuseoModerno:wght@700&display=swap" rel="stylesheet">
-  <title>ShoolCore App</title>
+  <title>SchoolCore App</title>
   <style>
     :root {
       color-scheme: dark;
@@ -108,23 +108,335 @@
       .logo { top: 10%; width: min(60dvh, 240px); }
       .continuar { bottom: max(10px, env(safe-area-inset-bottom, 0px)); }
     }
+
+    /* Popup para instalar a aplicação no telemóvel. */
+    .install-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 20;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      background: rgba(4, 16, 14, 0.74);
+      -webkit-backdrop-filter: blur(4px);
+      backdrop-filter: blur(4px);
+      animation: install-fade .2s ease-out;
+    }
+
+    .install-overlay[hidden] { display: none; }
+
+    .install-card {
+      position: relative;
+      width: min(360px, 100%);
+      max-height: calc(100dvh - 40px);
+      overflow-y: auto;
+      padding: 30px 24px 20px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 24px;
+      background: #173f38;
+      color: #fff;
+      text-align: center;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+      animation: install-pop .28s cubic-bezier(.2, .9, .3, 1.15);
+    }
+
+    .install-card [hidden] { display: none !important; }
+
+    .install-card:focus { outline: none; }
+
+    .install-button:focus-visible {
+      outline: 3px solid #fff;
+      outline-offset: 3px;
+    }
+
+    .install-icon {
+      display: block;
+      width: 68px;
+      height: 68px;
+      margin: 0 auto 14px;
+      border-radius: 18px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    .install-title {
+      margin: 0 0 8px;
+      font-size: 20px;
+      font-weight: 700;
+      line-height: 1.25;
+    }
+
+    .install-text {
+      margin: 0 0 14px;
+      font-size: 14px;
+      line-height: 1.5;
+      color: rgba(255, 255, 255, 0.82);
+    }
+
+    .install-steps { margin: 0 0 18px; text-align: left; }
+
+    .install-steps ol {
+      margin: 0;
+      padding: 0 0 0 22px;
+      font-size: 13.5px;
+      line-height: 1.55;
+      color: rgba(255, 255, 255, 0.9);
+    }
+
+    .install-steps li { padding: 3px 0 3px 6px; }
+    .install-steps strong { color: #fff; }
+
+    .install-share-icon {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      margin: 0 1px;
+      vertical-align: -3px;
+      color: #9fd3bf;
+    }
+
+    .install-button {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      min-height: 48px;
+      margin-top: 4px;
+      border: 0;
+      border-radius: 24px;
+      background: var(--botao);
+      color: #fff;
+      font: 700 16px/1.2 'MuseoModerno', 'Trebuchet MS', sans-serif;
+      cursor: pointer;
+    }
+
+    .install-button:active { filter: brightness(1.12); }
+
+    @keyframes install-fade {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes install-pop {
+      from { opacity: 0; transform: translateY(14px) scale(.97); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .install-overlay, .install-card { animation: none; }
+    }
   </style>
 </head>
 <body>
-  <main class="group-1" aria-label="Ecrã inicial">
+  <main class="group-1" aria-label="Welcome screen">
     <div class="app" aria-hidden="true"></div>
     <div class="logo">
       <p class="text-2">A space for everyone</p>
     </div>
-    <!-- Substitui ./inicio.html pelo destino real do botão quando estiver pronto. -->
-    <a class="continuar" href="./pages/login/index.html">Continuar</a>
+    <!-- O servidor encaminha para o login se a sessão já não for válida. -->
+    <a class="continuar" href="./pages/start/index.html">Continue</a>
   </main>
+  <!-- Popup de instalação: o conteúdo muda conforme o dispositivo (Android, iOS ou computador). -->
+  <div class="install-overlay" id="installOverlay" hidden>
+    <div class="install-card" id="installCard" role="dialog" aria-modal="true" aria-labelledby="installTitle" aria-describedby="installText" tabindex="-1">
+      <img class="install-icon" src="./images/Icon 192x192.png" alt="">
+      <h2 class="install-title" id="installTitle">Install SchoolCore</h2>
+      <p class="install-text" id="installText"></p>
+      <div class="install-steps" id="installSteps" hidden></div>
+      <button class="install-button" id="installAction" type="button" hidden>Install now</button>
+    </div>
+  </div>
+  <script src="./loading.js"></script>
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker.register('./sw.js').catch(console.error);
       });
     }
+
+    document.querySelector('.continuar').addEventListener('click', async (event) => {
+      if (!event.defaultPrevented && event.button === 0 && !event.ctrlKey && !event.metaKey && !event.shiftKey && !event.altKey) {
+        event.preventDefault();
+        const destination = event.currentTarget.href;
+        window.schoolcoreLoading.show('Opening the app…');
+        await window.schoolcoreLoading.wait();
+        window.location.assign(destination);
+      }
+    });
+
+    // Popup para instalar a webapp no telemóvel.
+    (function () {
+      const overlay = document.getElementById('installOverlay');
+      if (!overlay) return;
+
+      const titleEl = document.getElementById('installTitle');
+      const textEl = document.getElementById('installText');
+      const stepsEl = document.getElementById('installSteps');
+      const actionEl = document.getElementById('installAction');
+      const cardEl = document.getElementById('installCard');
+
+      const SHOW_DELAY_MS = 900;
+
+      const SHARE_ICON = '<svg class="install-share-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="M8 7l4-4 4 4"/><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/></svg>';
+
+      let deferredPrompt = null;
+      let shown = false;
+
+      function isStandalone() {
+        return window.matchMedia('(display-mode: standalone)').matches ||
+          window.matchMedia('(display-mode: fullscreen)').matches ||
+          window.navigator.standalone === true;
+      }
+
+      // Na app instalada, retomar diretamente uma sessão ainda válida.
+      if (isStandalone()) {
+        window.schoolcoreLoading.show('Checking your session…');
+        fetch('./api/me', { cache: 'no-store' })
+          .then(async (response) => {
+            if (response.ok) {
+              await window.schoolcoreLoading.wait();
+              window.location.replace('./pages/start/index.html');
+            }
+            else window.schoolcoreLoading.hide();
+          })
+          .catch(() => window.schoolcoreLoading.hide());
+      }
+
+      function getPlatform() {
+        const ua = navigator.userAgent || '';
+        const isIOS = /iPad|iPhone|iPod/.test(ua) ||
+          (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+        if (isIOS) return 'ios';
+        if (/Android/i.test(ua)) return 'android';
+        return 'desktop';
+      }
+
+      // No iOS só o Safari permite "Adicionar ao ecrã principal".
+      function isIOSSafari() {
+        const ua = navigator.userAgent || '';
+        return !/CriOS|FxiOS|EdgiOS|OPiOS|DuckDuckGo/.test(ua);
+      }
+
+      function setSteps(steps) {
+        if (!steps.length) {
+          stepsEl.hidden = true;
+          stepsEl.innerHTML = '';
+          return;
+        }
+        stepsEl.innerHTML = '<ol>' + steps.map((step) => '<li>' + step + '</li>').join('') + '</ol>';
+        stepsEl.hidden = false;
+      }
+
+      function render() {
+        const platform = getPlatform();
+
+        actionEl.hidden = true;
+        actionEl.textContent = 'Install now';
+
+        if (platform === 'ios') {
+          const safari = isIOSSafari();
+          titleEl.textContent = safari ? 'Install on your iPhone' : 'Open in Safari';
+          textEl.textContent = safari
+            ? 'Add SchoolCore to your home screen to use it as an app.'
+            : 'For the best installation experience, copy the link and open it in Safari.';
+          setSteps([
+            'Open this site in <strong>Safari</strong>.',
+            'Tap the <strong>Share</strong> button ' + SHARE_ICON + ' in the Safari toolbar.',
+            'Choose <strong>Add to Home Screen</strong>.',
+            'Tap <strong>Add</strong> to confirm.'
+          ]);
+          return;
+        }
+
+        if (platform === 'android') {
+          titleEl.textContent = 'Install on your phone';
+          textEl.textContent = 'Install SchoolCore to open it faster without the browser.';
+          if (deferredPrompt) {
+            setSteps([]);
+            actionEl.hidden = false;
+          } else {
+            setSteps([
+              'Tap the browser menu <strong>⋮</strong>.',
+              'Choose <strong>Install app</strong> or <strong>Add to Home screen</strong>.',
+              'Tap <strong>Install</strong> to confirm.'
+            ]);
+          }
+          return;
+        }
+
+        // Computador (Windows, macOS ou Linux).
+        titleEl.textContent = 'Available on mobile only';
+        textEl.textContent = 'This service is not available on computers. Open the site on an Android phone or iPhone to install the app.';
+        setSteps([]);
+      }
+
+      function open() {
+        if (shown || isStandalone()) return;
+        render();
+        overlay.hidden = false;
+        shown = true;
+        requestAnimationFrame(() => {
+          (actionEl.hidden ? cardEl : actionEl).focus({ preventScroll: true });
+        });
+      }
+
+      function hide() {
+        overlay.hidden = true;
+        shown = false;
+      }
+
+      actionEl.addEventListener('click', async () => {
+        const platform = getPlatform();
+
+        if (platform === 'android' && deferredPrompt) {
+          const promptEvent = deferredPrompt;
+          deferredPrompt = null;
+          promptEvent.prompt();
+          try {
+            const choice = await promptEvent.userChoice;
+            if (choice && choice.outcome === 'accepted') {
+              hide();
+              return;
+            }
+          } catch (error) {
+            // Se o prompt falhar, mostramos as instruções manuais.
+          }
+          // O utilizador recusou: o popup mantém-se e passam a aparecer os passos manuais.
+          render();
+        }
+      });
+
+      window.addEventListener('beforeinstallprompt', (event) => {
+        event.preventDefault();
+        deferredPrompt = event;
+        if (shown) render();
+      });
+
+      window.addEventListener('appinstalled', () => {
+        deferredPrompt = null;
+        hide();
+      });
+
+      // Se a app passar a correr como instalada, esconder o popup.
+      const standaloneQuery = window.matchMedia('(display-mode: standalone)');
+      const onStandaloneChange = (event) => {
+        if (event.matches) hide();
+      };
+      if (typeof standaloneQuery.addEventListener === 'function') {
+        standaloneQuery.addEventListener('change', onStandaloneChange);
+      }
+
+      function scheduleShow() {
+        if (isStandalone()) return;
+        window.setTimeout(open, SHOW_DELAY_MS);
+      }
+
+      if (document.readyState === 'complete') {
+        scheduleShow();
+      } else {
+        window.addEventListener('load', scheduleShow);
+      }
+    })();
   </script>
 </body>
 </html>

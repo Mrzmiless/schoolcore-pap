@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#10322D">
+  <title>SchoolCore — Home</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100vh; display: grid; place-items: center; background: #10322D; color: white; font-family: 'Trebuchet MS', sans-serif; }
+    main { width: min(100%, 480px); padding: 24px; }
+    .card { padding: 26px; border-radius: 22px; background: #173f38; }
+    h1 { color: #c9ffdb; font-size: 1.6rem; }
+    p, li { line-height: 1.6; }
+    button { border: 0; border-radius: 24px; padding: 14px 22px; background: #597d6e; color: white; font: inherit; font-weight: bold; cursor: pointer; }
+    button:focus-visible { outline: 3px solid white; outline-offset: 3px; }
+    button:disabled { opacity: .6; }
+    [hidden] { display: none !important; }
+  </style>
+</head>
+<body>
+  <main>
+    <section class="card" id="intro" hidden>
+      <h1 id="welcome">Welcome to SchoolCore</h1>
+      <p>SchoolCore is an app for school life, designed for students, teachers and administrators.</p>
+      <p>What you can do now:</p>
+      <ul>
+        <li>Sign in with your personal account.</li>
+        <li>Install the app on your phone and open it from your home screen.</li>
+      </ul>
+      <p>More school features are in development and will depend on your role.</p>
+      <button id="complete" type="button">Get started</button>
+    </section>
+    <section class="card" id="home" hidden>
+      <h1 id="home-title">Welcome to SchoolCore</h1>
+      <p>The home page is under development.</p>
+      <button id="logout" type="button">Sign out</button>
+    </section>
+    <p id="status" role="status" aria-live="polite">Loading…</p>
+  </main>
+  <script src="../../loading.js"></script>
+  <script>
+    const intro = document.getElementById('intro');
+    const home = document.getElementById('home');
+    const status = document.getElementById('status');
+    const complete = document.getElementById('complete');
+
+    async function loadUser() {
+      window.schoolcoreLoading.show('Loading your account…');
+      try {
+        const response = await fetch('../../api/me', { cache: 'no-store' });
+        if (response.status === 401) { await window.schoolcoreLoading.wait(); window.location.replace('../login/index.html'); return; }
+        if (!response.ok) throw new Error();
+        const user = await response.json();
+        const name = user.first_name || user.username;
+        document.getElementById('welcome').textContent = 'Welcome to SchoolCore, ' + name + '!';
+        document.getElementById('home-title').textContent = 'Hello, ' + name + '!';
+        intro.hidden = user.is_first_login_done;
+        home.hidden = !user.is_first_login_done;
+        status.textContent = '';
+      } catch (error) {
+        status.textContent = 'Could not load your account. Refresh the page to try again.';
+      } finally {
+        await window.schoolcoreLoading.hide();
+      }
+    }
+
+    complete.addEventListener('click', async () => {
+      complete.disabled = true;
+      window.schoolcoreLoading.show('Saving…');
+      try {
+        const response = await fetch('../../api/onboarding/complete', { method: 'POST' });
+        if (response.status === 401) { await window.schoolcoreLoading.wait(); window.location.replace('../login/index.html'); return; }
+        if (!response.ok) throw new Error();
+        intro.hidden = true;
+        home.hidden = false;
+        status.textContent = '';
+      } catch (error) {
+        status.textContent = 'Could not save. Please try again.';
+      } finally { await window.schoolcoreLoading.hide(); complete.disabled = false; }
+    });
+
+    document.getElementById('logout').addEventListener('click', async (event) => {
+      const button = event.currentTarget;
+      button.disabled = true;
+      window.schoolcoreLoading.show('Signing out…');
+      try {
+        const response = await fetch('../../api/logout', { method: 'POST' });
+        if (!response.ok) throw new Error();
+        await window.schoolcoreLoading.wait();
+        window.location.replace('../login/index.html');
+      } catch (error) {
+        status.textContent = 'Could not sign out. Please try again.';
+        await window.schoolcoreLoading.hide();
+        button.disabled = false;
+      }
+    });
+    loadUser();
+  </script>
+</body>
+</html>

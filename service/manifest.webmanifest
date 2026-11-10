@@ -2,7 +2,7 @@
 {
   "name": "SchoolCore",
   "short_name": "SC App",
-  "description": "A space everyone",
+  "description": "A space for everyone",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
@@ -16,7 +16,7 @@
       "purpose": "any maskable"
     },
     {
-      "src": "images/Icon 512x512.pngg",
+      "src": "images/Icon 512x512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"

@@ -1,10 +1,12 @@
 
-const CACHE_NAME = "minha-pwa-v1";
+const CACHE_NAME = "minha-pwa-v9";
 
 const FILES = [
   "./",
   "./index.html",
   "./manifest.webmanifest",
+  "./loading.js",
+  "./pages/start/loading.html",
   "./image.png",
   "./images/Icon 192x192.png",
   "./images/Icon 512x512.png"

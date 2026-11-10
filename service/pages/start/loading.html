@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#10322D">
+  <title>Loading — SchoolCore</title>
+  <style>
+    * { box-sizing: border-box; }
+    html, body { margin: 0; min-height: 100%; background: #10322D; }
+    body { color: white; font-family: 'Trebuchet MS', sans-serif; }
+    .loading { min-height: 100vh; min-height: 100dvh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 24px; text-align: center; }
+    .logo { width: min(260px, 70vw, 38vh); aspect-ratio: 1; background: url('../../image.png') center / contain no-repeat; }
+    .spinner { width: 32px; height: 32px; margin-top: 24px; border: 3px solid rgba(255,255,255,.25); border-top-color: #c9ffdb; border-radius: 50%; animation: spin .8s linear infinite; }
+    .text { margin: 18px 0 0; font-size: 18px; font-weight: 700; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    @media (prefers-reduced-motion: reduce) { .spinner { animation: none; } }
+  </style>
+</head>
+<body>
+  <main class="loading">
+    <div class="logo" aria-hidden="true"></div>
+    <div class="spinner" aria-hidden="true"></div>
+    <p class="text">Loading…</p>
+  </main>
+</body>
+</html>

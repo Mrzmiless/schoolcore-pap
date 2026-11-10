@@ -1,15 +1,15 @@
 <!DOCTYPE html>
-<html lang="pt-PT">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="theme-color" content="#10322D">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="Minha App">
-  <meta name="description" content="Ecrã de login — A space for everyone">
-  <link rel="manifest" href="./manifest.webmanifest">
-  <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png">
+  <meta name="apple-mobile-web-app-title" content="SchoolCore">
+  <meta name="description" content="Login — A space for everyone">
+  <link rel="manifest" href="../../manifest.webmanifest">
+  <link rel="apple-touch-icon" href="../../images/Icon 192x192.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=MuseoModerno:wght@400;700&display=swap" rel="stylesheet">
@@ -48,13 +48,13 @@
     .topbar {
       position: absolute;
       inset: 0 0 auto;
-      height: calc(92px + env(safe-area-inset-top, 0px));
+      height: calc(86px + env(safe-area-inset-top, 0px));
       border-radius: 0 0 15px 15px;
       background: var(--topo);
     }
     .topbar__title {
       position: absolute;
-      top: calc(30px + env(safe-area-inset-top, 0px));
+      top: calc(28px + env(safe-area-inset-top, 0px));
       left: 50%;
       transform: translateX(-50%);
       width: 121px;
@@ -66,9 +66,10 @@
       text-align: center;
     }
     .logo {
-      width: min(249px, 62vw);
+      width: min(205px, 54vw);
       aspect-ratio: 1;
-      margin-bottom: 11px;
+      flex-shrink: 0;
+      margin-bottom: 8px;
       background: url('../../image.png') center / cover no-repeat;
     }
     .login-form {
@@ -106,8 +107,10 @@
     .field input::placeholder { color: rgba(255,255,255,.65); }
     .field input:focus-visible { border-color: #C9FFDB; }
     .termos {
-      max-height: 161px;
+      max-height: 142px;
       margin-top: 22px;
+      margin-bottom: 24px;
+      flex-shrink: 0;
       padding: 14px 15px;
       overflow-y: auto;
       border-radius: 20px;
@@ -137,6 +140,7 @@
       justify-content: center;
       width: min(234px, 100%);
       height: 49px;
+      flex-shrink: 0;
       margin: auto auto 0;
       padding: 0 12px;
       border: 0;
@@ -185,16 +189,49 @@ By logging in, you declare that the information provided is yours and that you a
       <button class="loginbutton" type="submit">Login</button>
     </form>
   </main>
+  <script src="../../loading.js"></script>
   <script>
-    // Este ecrã contém apenas a interface. É necessário um servidor/API para autenticar utilizadores.
-    document.getElementById('login-form').addEventListener('submit', (event) => {
+    document.getElementById('login-form').addEventListener('submit', async (event) => {
       event.preventDefault();
-      document.getElementById('login-status').textContent =
-        'Ecrã de login pronto. Falta ligar a autenticação ao servidor.';
+      const form = event.currentTarget;
+      const status = document.getElementById('login-status');
+      const button = form.querySelector('button[type="submit"]');
+      button.disabled = true;
+      status.textContent = 'Signing in…';
+      window.schoolcoreLoading.show('Signing in…');
+      let navigating = false;
+      let errorMessage = '';
+      try {
+        const response = await fetch('../../api/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username: form.username.value, password: form.password.value })
+        });
+        if (response.ok) {
+          form.password.value = '';
+          status.textContent = 'Signed in. Opening the home page…';
+          await window.schoolcoreLoading.wait();
+          navigating = true;
+          window.location.assign('../start/index.html');
+        } else {
+          const data = await response.json().catch(() => ({}));
+          errorMessage = response.status === 403 && data.detail === 'account_disabled'
+            ? 'Your account is now disabled, please talk to your school support'
+            : response.status === 401 ? 'Incorrect username or password.' : 'Could not sign in. Please try again.';
+        }
+      } catch (error) {
+        errorMessage = 'Could not reach the server. Please try again.';
+      } finally {
+        if (!navigating) {
+          status.textContent = '';
+          await window.schoolcoreLoading.showError(errorMessage);
+        }
+        button.disabled = false;
+      }
     });
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js').catch(console.error);
+        navigator.serviceWorker.register('../../sw.js').catch(console.error);
       });
     }
   </script>
