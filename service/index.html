@@ -254,16 +254,6 @@
       });
     }
 
-    document.querySelector('.continuar').addEventListener('click', async (event) => {
-      if (!event.defaultPrevented && event.button === 0 && !event.ctrlKey && !event.metaKey && !event.shiftKey && !event.altKey) {
-        event.preventDefault();
-        const destination = event.currentTarget.href;
-        window.schoolcoreLoading.show('Opening the app…');
-        await window.schoolcoreLoading.wait();
-        window.location.assign(destination);
-      }
-    });
-
     // Popup para instalar a webapp no telemóvel.
     (function () {
       const overlay = document.getElementById('installOverlay');
@@ -290,16 +280,13 @@
 
       // Na app instalada, retomar diretamente uma sessão ainda válida.
       if (isStandalone()) {
-        window.schoolcoreLoading.show('Checking your session…');
         fetch('./api/me', { cache: 'no-store' })
-          .then(async (response) => {
+          .then((response) => {
             if (response.ok) {
-              await window.schoolcoreLoading.wait();
               window.location.replace('./pages/start/index.html');
             }
-            else window.schoolcoreLoading.hide();
           })
-          .catch(() => window.schoolcoreLoading.hide());
+          .catch(() => {});
       }
 
       function getPlatform() {

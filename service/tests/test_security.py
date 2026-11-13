@@ -49,6 +49,21 @@ class SecurityTests(unittest.TestCase):
             for path in ('/.env', '/launch.py', '/security.py'):
                 self.assertEqual(client.get(path).status_code, 404)
 
+    def test_home_and_account_require_session_and_onboarding(self):
+        with TestClient(launch.app) as client:
+            for path in ('/pages/start/HomePage.html', '/pages/start/account.html', '/pages/start/home-content.html', '/pages/start/not-found.html'):
+                response = client.get(path, follow_redirects=False)
+                self.assertEqual(response.status_code, 303)
+                self.assertEqual(response.headers['location'], '/pages/login/index.html')
+                with patch.object(launch, 'current_user', return_value={'is_first_login_done': False}):
+                    response = client.get(path, follow_redirects=False)
+                self.assertEqual(response.status_code, 303)
+                self.assertEqual(response.headers['location'], '/pages/start/index.html')
+                with patch.object(launch, 'current_user', return_value={'is_first_login_done': True}):
+                    response = client.get(path)
+                self.assertEqual(response.status_code, 200)
+                self.assertEqual(response.headers['cache-control'], 'no-store')
+
     def test_account_details_exclude_password_and_require_session(self):
         user = {'_id': 'example-id', 'username': 'example', 'first_name': 'Alex',
                 'last_name': 'Smith', 'password_hash': 'secret', 'role': 'aluno',

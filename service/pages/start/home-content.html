@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SchoolCore — Home</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=MuseoModerno:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; background: #10322D; color: white; font-family: 'MuseoModerno', 'Trebuchet MS', sans-serif; }
+    main { width: min(100%, 480px); margin: 0 auto; padding: 28px 24px; }
+    h2 { color: #C9FFDB; font-size: 22px; }
+    p { line-height: 1.5; }
+    a { display: inline-block; margin-top: 12px; padding: 13px 20px; border-radius: 20px; background: #5F7D6A; color: white; text-decoration: none; font-weight: 700; }
+    a:focus-visible { outline: 3px solid white; outline-offset: 2px; }
+  </style>
+</head>
+<body>
+  <main>
+    <h2 id="welcome">Welcome to SchoolCore</h2>
+    <p>Choose an option below. More features are coming soon.</p>
+    <a id="account-link" href="./HomePage.html#user" target="_top">View account information</a>
+  </main>
+  <script src="../../loading.js"></script>
+  <script>
+    document.getElementById('account-link').addEventListener('click', (event) => {
+      if (window.parent !== window && !event.ctrlKey && !event.metaKey && !event.shiftKey && !event.altKey) {
+        event.preventDefault();
+        window.parent.postMessage({ type: 'schoolcore:navigate', page: 'user' }, location.origin);
+      }
+    });
+    (async () => {
+      try {
+        const response = await fetch('../../api/me', { cache: 'no-store' });
+        if (response.status === 401) { (window.parent !== window ? window.parent : window).location.replace('../login/index.html'); return; }
+        if (!response.ok) throw new Error();
+        const user = await response.json();
+        document.getElementById('welcome').textContent = 'Welcome, ' + (user.first_name || user.username) + '!';
+      } catch (error) {
+        document.getElementById('welcome').textContent = 'Could not load your account. Please refresh the page.';
+      }
+    })();
+  </script>
+</body>
+</html>
