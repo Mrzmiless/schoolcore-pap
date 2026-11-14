@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Page not found — SchoolCore</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; background: #10322D; color: white; font-family: 'Trebuchet MS', sans-serif; }
+    main { width: min(100%, 480px); margin: 0 auto; padding: 36px 24px; }
+    section { padding: 26px; border-radius: 22px; background: #173f38; }
+    h1 { color: #c9ffdb; font-size: 22px; }
+    p { line-height: 1.5; }
+  </style>
+</head>
+<body>
+  <main><section>
+    <h1>Page not found</h1>
+    <p id="message">This page is not available yet. Please check back later.</p>
+  </section></main>
+  <script>
+    const names = { sinfo: 'School Info', bar: 'Bar', lunch: 'Lunch' };
+    const page = new URLSearchParams(location.search).get('page');
+    if (Object.hasOwn(names, page)) {
+      document.getElementById('message').textContent = names[page] + ' is not available yet. Please check back later.';
+    }
+  </script>
+</body>
+</html>

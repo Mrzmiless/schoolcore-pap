@@ -190,6 +190,38 @@ def start_page(request: Request):
     return FileResponse(BASE / 'pages' / 'start' / 'index.html', headers={'Cache-Control': 'no-store'})
 
 
+def authenticated_start_page(request: Request, filename: str):
+    try:
+        user = current_user(request)
+    except HTTPException as error:
+        if error.status_code == 401:
+            return RedirectResponse('/pages/login/index.html', status_code=303, headers={'Cache-Control': 'no-store'})
+        raise
+    if user.get('is_first_login_done') is not True:
+        return RedirectResponse('/pages/start/index.html', status_code=303, headers={'Cache-Control': 'no-store'})
+    return FileResponse(BASE / 'pages' / 'start' / filename, headers={'Cache-Control': 'no-store'})
+
+
+@app.get('/pages/start/HomePage.html')
+def home_page(request: Request):
+    return authenticated_start_page(request, 'HomePage.html')
+
+
+@app.get('/pages/start/account.html')
+def account_page(request: Request):
+    return authenticated_start_page(request, 'account.html')
+
+
+@app.get('/pages/start/home-content.html')
+def home_content(request: Request):
+    return authenticated_start_page(request, 'home-content.html')
+
+
+@app.get('/pages/start/not-found.html')
+def unavailable_page(request: Request):
+    return authenticated_start_page(request, 'not-found.html')
+
+
 @app.get('/{filename}')
 def public_file(filename: str):
     if filename not in {'index.html', 'sw.js', 'manifest.webmanifest', 'image.png', 'style.css', 'loading.js'}:

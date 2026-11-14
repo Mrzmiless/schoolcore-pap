@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#10322D">
+  <title>SchoolCore — Home</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=MuseoModerno:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; }
+    html { height: 100%; }
+    body { margin: 0; height: 100vh; height: 100dvh; overflow: hidden; display: flex; flex-direction: column; background: #10322D; color: #fff; font-family: 'MuseoModerno', 'Trebuchet MS', sans-serif; }
+    .topbar { flex: none; min-height: calc(63px + env(safe-area-inset-top, 0px)); padding: env(safe-area-inset-top, 0px) 24px 0; border-radius: 0 0 15px 15px; background: #2E493E; display: flex; align-items: center; justify-content: space-between; }
+    .topbar img { width: 63px; height: 63px; object-fit: contain; }
+    .topbar h1 { color: #C9FFDB; font-size: 16px; margin: 0; }
+    .content { position: relative; flex: 1; min-height: 0; margin-bottom: 70px; overflow: hidden; }
+    .content iframe { display: block; width: 100%; height: 100%; border: 0; background: #10322D; transition: opacity .2s ease; }
+    .content.is-loading iframe { opacity: 0; }
+    .content-loading { position: absolute; inset: 0; display: grid; place-items: center; color: #C9FFDB; background: #10322D; font-size: 14px; pointer-events: none; opacity: 0; transition: opacity .2s ease; }
+    .content.is-loading .content-loading { opacity: 1; }
+    .content-loading::before { content: ''; position: absolute; width: 30px; height: 30px; margin-top: -48px; border: 3px solid rgba(255,255,255,.25); border-top-color: #C9FFDB; border-radius: 50%; animation: spin .8s linear infinite; }
+    .content.has-error .content-loading::before { display: none; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    /* Adjust this value to move the bar up or down. */
+    .nav-area { position: fixed; z-index: 2; left: 0; right: 0; bottom: 4px; padding: 0 6px; }
+    .navigation { position: relative; display: grid; grid-template-columns: repeat(5, 1fr); align-items: center; width: min(334px, 100%); min-height: 62px; margin: 0 auto; padding: 4px; border-radius: 20px; background: #5F7D6A; }
+    .nav-indicator { position: absolute; z-index: 0; top: 7px; bottom: 7px; left: 4px; width: calc((100% - 8px) / 5); border-radius: 12px; background: rgba(16,50,45,.35); transform: translateX(200%); transition: transform .3s ease; pointer-events: none; }
+    .navigation a, .navigation button { position: relative; z-index: 1; display: flex; align-items: center; justify-content: center; min-width: 0; min-height: 48px; padding: 4px 1px; border: 0; border-radius: 12px; background: transparent; color: #fff; font: 700 12px/1.2 'MuseoModerno', 'Trebuchet MS', sans-serif; text-align: center; text-decoration: none; cursor: pointer; }
+    .navigation button:disabled { opacity: .5; cursor: not-allowed; }
+    a:focus-visible, button:focus-visible { outline: 3px solid white; outline-offset: 2px; }
+    @media (prefers-reduced-motion: reduce) { .nav-indicator, .content iframe, .content-loading { transition: none; } .content-loading::before { animation: none; } }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <img src="../../image.png" alt="SchoolCore">
+    <h1 id="page-title">Home</h1>
+  </header>
+  <main class="content is-loading" id="content" aria-busy="true">
+    <iframe id="page-frame" title="Home" src="./home-content.html"></iframe>
+    <div class="content-loading" id="content-loading" role="status">Loading…</div>
+  </main>
+  <div class="nav-area"><nav class="navigation" aria-label="Main navigation">
+    <span class="nav-indicator" id="nav-indicator" aria-hidden="true"></span>
+    <a href="#sinfo" data-page="sinfo">SInfo</a>
+    <a href="#bar" data-page="bar">Bar</a>
+    <a href="#home" data-page="home" aria-current="page">Home</a>
+    <a href="#lunch" data-page="lunch">Lunch</a>
+    <a href="#user" data-page="user">User</a>
+  </nav></div>
+  <script src="../../loading.js"></script>
+  <script>
+    const frame = document.getElementById('page-frame');
+    const content = document.getElementById('content');
+    const indicator = document.getElementById('nav-indicator');
+    const pages = {
+      sinfo: { url: './not-found.html?page=sinfo', title: 'School Info', position: 0 },
+      bar: { url: './not-found.html?page=bar', title: 'Bar', position: 1 },
+      home: { url: './home-content.html', title: 'Home', position: 2 },
+      lunch: { url: './not-found.html?page=lunch', title: 'Lunch', position: 3 },
+      user: { url: './account.html?embedded=1', title: 'User', position: 4 }
+    };
+    let activePage = 'home';
+
+    function navigate(page) {
+      if (!pages[page] || page === activePage) return;
+      activePage = page;
+      const selected = pages[page];
+      indicator.style.transform = 'translateX(' + (selected.position * 100) + '%)';
+      document.getElementById('page-title').textContent = selected.title;
+      frame.title = selected.title;
+      document.querySelectorAll('[data-page]').forEach((link) => {
+        if (link.dataset.page === page) link.setAttribute('aria-current', 'page');
+        else link.removeAttribute('aria-current');
+      });
+      content.classList.add('is-loading');
+      content.classList.remove('has-error');
+      document.getElementById('content-loading').textContent = 'Loading…';
+      content.setAttribute('aria-busy', 'true');
+      frame.src = selected.url;
+    }
+    frame.addEventListener('load', () => {
+      try {
+        const path = frame.contentWindow.location.pathname;
+        if (path.endsWith('/pages/login/index.html') || path.endsWith('/pages/start/index.html')) {
+          window.location.replace(frame.contentWindow.location.href);
+          return;
+        }
+        if (frame.contentDocument && frame.contentDocument.contentType.includes('json')) {
+          content.classList.add('is-loading');
+          content.classList.add('has-error');
+          content.setAttribute('aria-busy', 'false');
+          document.getElementById('content-loading').textContent = 'Could not load this page. Restart the server and try again.';
+          return;
+        }
+      } catch (error) { /* The iframe may be inaccessible during navigation. */ }
+      content.classList.remove('is-loading');
+      content.setAttribute('aria-busy', 'false');
+    });
+    document.querySelectorAll('[data-page]').forEach((link) => {
+      link.addEventListener('click', () => navigate(link.dataset.page));
+    });
+    function pageFromHash() {
+      const page = location.hash.slice(1);
+      return Object.hasOwn(pages, page) ? page : 'home';
+    }
+    window.addEventListener('hashchange', () => navigate(pageFromHash()));
+    window.addEventListener('message', (event) => {
+      if (event.origin === location.origin && event.source === frame.contentWindow && event.data && event.data.type === 'schoolcore:navigate' && event.data.page === 'user') location.hash = 'user';
+    });
+    navigate(pageFromHash());
+  </script>
+</body>
+</html>

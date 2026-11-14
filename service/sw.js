@@ -1,5 +1,5 @@
 
-const CACHE_NAME = "minha-pwa-v10";
+const CACHE_NAME = "minha-pwa-v11";
 
 const FILES = [
   "./",
