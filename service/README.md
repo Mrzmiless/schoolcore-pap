@@ -40,3 +40,36 @@ Faltam ainda políticas de conta, recuperação de password, auditoria, backups,
 pip install -r requirements-test.txt
 python -m unittest discover -s tests
 ```
+
+## Teste de carga local
+
+O teste cria contas temporárias numa base separada, simula login, pedidos autenticados a `/api/me` e logout, e apresenta tempos de resposta, códigos HTTP e pedidos por segundo. Não executes o teste contra o servidor ou a base de produção: este teste pode consumir CPU, memória e ligações e deve correr num ambiente isolado. O nome da base tem de terminar em `_loadtest`, mas isso não garante, por si só, que o servidor é isolado.
+
+Instala `requirements-test.txt` e, num terminal PowerShell na pasta `service`, arranca uma instância separada da aplicação. Ela usa a ligação MongoDB de `service/.env`, mas uma base e porta de teste próprias:
+
+```powershell
+$env:MONGODB_DATABASE = 'schoolcore_loadtest'
+$env:HOST = '127.0.0.1'
+$env:PORT = '8081'
+$env:APP_ORIGIN = 'http://127.0.0.1:8081'
+$env:COOKIE_SECURE = 'false'
+python launch.py serve
+```
+
+Noutro terminal, com o ambiente virtual ativo e na pasta `service`, executa:
+
+```powershell
+python load_test.py --database schoolcore_loadtest --confirm-test-db --url http://127.0.0.1:8081 --users 5 --concurrency 5 --requests 5
+```
+
+O servidor tem de usar a mesma base MongoDB e a mesma origem indicadas ao script. `--users` define o número de contas, `--concurrency` o máximo de utilizadores em simultâneo e `--requests` o número de pedidos `/api/me` por utilizador. O relatório inclui respostas de erro; p95 e p99 são percentis dos tempos dos pedidos que receberam resposta HTTP. A duração e o débito não incluem a criação das contas nem a limpeza.
+
+O limite normal de 15 logins por IP em cada janela de 5 minutos mantém-se ativo, incluindo logins de execuções anteriores. Um `429` significa que o limite foi atingido, não necessariamente que o servidor está sobrecarregado. Para testar cargas maiores sem alterar a proteção, são necessários clientes com IPs diferentes; não falsifiques cabeçalhos de IP. Não uses esta instância com utilizadores reais: para HTTP a cookie segura está desativada.
+
+O script remove apenas as contas da sua execução e as respetivas sessões, mesmo em caso de erro normal ou interrupção por Ctrl+C. Uma paragem forçada, falha de energia ou falha de ligação pode impedir a limpeza. Guarda o ID da execução mostrado no início; para repetir a limpeza, com a mesma ligação MongoDB configurada:
+
+```powershell
+python load_test.py --database schoolcore_loadtest --confirm-test-db --cleanup-run ID_DA_EXECUCAO
+```
+
+A base de teste, os índices e os registos temporários de limitação de login permanecem; estes últimos expiram automaticamente. O script nunca apaga a base inteira nem os limites de outros utilizadores. As variáveis `$env:` alteradas no primeiro terminal mantêm-se nessa sessão; fecha-o ou remove-as antes de voltar a iniciar o servidor normal.
