@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#10322D">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="SchoolCore">
+  <meta name="description" content="Login — A space for everyone">
+  <link rel="manifest" href="../../manifest.webmanifest">
+  <link rel="apple-touch-icon" href="../../images/Icon 192x192.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=MuseoModerno:wght@400;700&display=swap" rel="stylesheet">
+  <title>Login SC</title>
+  <link rel="stylesheet" href="../../assets/css/login.css">
+  <link rel="stylesheet" href="../../assets/css/notice.css">
+  <link rel="stylesheet" href="../../assets/css/loading-overlay.css">
+</head>
+<body>
+  <main class="inicio">
+    <header class="topbar">
+      <h1 class="topbar__title">Login</h1>
+    </header>
+
+    <div class="logo" role="img" aria-label="Logo"></div>
+
+    <form class="login-form" id="login-form">
+      <div class="fields">
+        <div class="field">
+          <label for="username">Username</label>
+          <input id="username" name="username" type="text" autocomplete="username" required>
+        </div>
+        <div class="field">
+          <label for="password">Password</label>
+          <input id="password" name="password" type="password" autocomplete="current-password" required>
+        </div>
+      </div>
+
+      <section class="termos" aria-labelledby="termos-title" tabindex="0">
+        <h2 class="termos__title" id="termos-title">Terms and Conditions</h2>
+        <p>
+By logging in, you declare that the information provided is yours and that you agree to use the application responsibly. Access is personal and non-transferable, so you must not share your login credentials with third parties. Misuse of the account may result in suspension of access. Your data is processed solely for authentication and account management purposes.
+        </p>
+      </section>
+
+      <p class="login-status" id="login-status" role="status" aria-live="polite"></p>
+
+      <button class="loginbutton" type="submit">Login</button>
+    </form>
+  </main>
+  <script src="../../loading.js"></script>
+  <script src="../../assets/js/login.js"></script>
+</body>
+</html>

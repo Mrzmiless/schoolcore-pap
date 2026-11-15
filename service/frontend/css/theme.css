@@ -1,0 +1,68 @@
+:root {
+  touch-action: manipulation;
+  color-scheme: dark;
+  --sc-background: #10322d;
+  --sc-surface: #173f38;
+  --sc-topbar: #2e493e;
+  --sc-text: #fff;
+  --sc-accent: #c9ffdb;
+  --sc-button: #597d6e;
+  --sc-button-text: #fff;
+  --sc-nav: #5f7d6a;
+  --sc-nav-glass: rgba(95,125,106,.55);
+  --sc-nav-text: #fff;
+  --sc-nav-active: rgba(16,50,45,.35);
+  --sc-border: rgba(255,255,255,.2);
+  --sc-focus: #fff;
+}
+:root[data-theme="light"] {
+  color-scheme: light;
+  --sc-background: #edf5ef;
+  --sc-surface: #fff;
+  --sc-topbar: #d7eadc;
+  --sc-text: #142e24;
+  --sc-accent: #174b33;
+  --sc-button: #24573c;
+  --sc-button-text: #fff;
+  --sc-nav: #d2e8d8;
+  --sc-nav-glass: rgba(210,232,216,.94);
+  --sc-nav-text: #142e24;
+  --sc-nav-active: rgba(36,87,60,.20);
+  --sc-border: rgba(20,46,36,.32);
+  --sc-focus: #17372c;
+}
+:root[data-theme="amoled"] {
+  color-scheme: dark;
+  --sc-background: #000;
+  --sc-surface: #0b110d;
+  --sc-topbar: #0c1710;
+  --sc-text: #fff;
+  --sc-accent: #c9ffdb;
+  --sc-button: #315f41;
+  --sc-button-text: #fff;
+  --sc-nav: #14271a;
+  --sc-nav-glass: rgba(20,39,26,.96);
+  --sc-nav-text: #fff;
+  --sc-nav-active: rgba(201,255,219,.18);
+  --sc-border: rgba(201,255,219,.3);
+  --sc-focus: #fff;
+}
+:root[data-blur="off"] .navigation { background: var(--sc-nav); -webkit-backdrop-filter: none; backdrop-filter: none; }
+:root[data-text-size="large"] body { font-size: 1.125rem; }
+:root[data-text-size="large"] .topbar h1 { font-size: 18px; }
+:root[data-text-size="large"] .navigation a,
+:root[data-text-size="large"] .navigation button { font-size: 13px; }
+:root[data-text-size="large"] .account-details dt { font-size: 1rem; }
+:root[data-motion="reduced"] *,
+:root[data-motion="reduced"] *::before,
+:root[data-motion="reduced"] *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+.schoolcore-loading { background: var(--sc-background); color: var(--sc-text); }
+.schoolcore-loading__spinner { border-color: var(--sc-border); border-top-color: var(--sc-accent); }
+.schoolcore-loading__back { background: var(--sc-button); color: var(--sc-button-text); }
+.schoolcore-loading__back:focus-visible { outline-color: var(--sc-focus); }
+:root[data-theme="light"] .card, :root[data-theme="light"] .account-section,
+:root[data-theme="amoled"] .card, :root[data-theme="amoled"] .account-section,
+:root[data-theme="light"] .navigation, :root[data-theme="amoled"] .navigation {
+  border: 1px solid var(--sc-border);
+}
+:root[data-theme="light"] .navigation a:hover:not([aria-current="page"]) { background: rgba(20,46,36,.10); }

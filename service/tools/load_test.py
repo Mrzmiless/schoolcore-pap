@@ -8,7 +8,6 @@ import sys
 import time
 from collections import Counter
 from concurrent.futures import ThreadPoolExecutor
-from pathlib import Path
 from urllib.parse import urlsplit
 
 import httpx
@@ -17,6 +16,7 @@ from bson import ObjectId
 from dotenv import load_dotenv
 from pymongo import MongoClient
 from pymongo.errors import PyMongoError
+from backend.config_paths import environment_path
 
 
 def origin_url(value):
@@ -123,10 +123,13 @@ def main(argv=None):
     if args.cleanup_run and (len(args.cleanup_run) != 32 or any(c not in '0123456789abcdef' for c in args.cleanup_run)):
         parser.error('ID de execução inválido')
 
-    load_dotenv(Path(__file__).resolve().parent / '.env')
+    try:
+        load_dotenv(environment_path())
+    except RuntimeError as exc:
+        parser.error(str(exc))
     uri = os.getenv('MONGODB_URI')
     if not uri:
-        parser.error('Configura MONGODB_URI em service/.env')
+        parser.error('Configura MONGODB_URI em service/config/.env')
     client = MongoClient(uri, serverSelectionTimeoutMS=5000)
     db = client[args.database]
     run_id = args.cleanup_run or secrets.token_hex(16)

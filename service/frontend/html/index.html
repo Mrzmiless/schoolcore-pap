@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#10322D">
+  <meta name="description" content="A space for everyone">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="SchoolCore">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="apple-touch-icon" href="./images/Icon 192x192.png">
+  <link rel="icon" type="image/png" href="./images/Icon 192x192.png">
+  <!-- A letra MuseoModerno é carregada da Google Fonts quando houver Internet. -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=MuseoModerno:wght@700&display=swap" rel="stylesheet">
+  <title>SchoolCore App</title>
+  <link rel="stylesheet" href="./assets/css/welcome.css">
+  <link rel="stylesheet" href="./assets/css/notice.css">
+  <link rel="stylesheet" href="./assets/css/loading-overlay.css">
+</head>
+<body>
+  <div id="startup-splash" class="startup-splash" hidden role="status" aria-live="polite">
+    <img src="./image.png" alt="">
+    <p id="startup-message">Logging in…</p>
+    <button id="startup-retry" type="button" hidden>Try again</button>
+  </div>
+  <main class="group-1" aria-label="Welcome screen">
+    <div class="app" aria-hidden="true"></div>
+    <div class="logo">
+      <p class="text-2">A space for everyone</p>
+    </div>
+    <!-- O servidor encaminha para o login se a sessão já não for válida. -->
+    <a class="continuar" href="./pages/start/index.html">Continue</a>
+  </main>
+  <!-- Popup de instalação: o conteúdo muda conforme o dispositivo (Android, iOS ou computador). -->
+  <div class="install-overlay" id="installOverlay" hidden>
+    <div class="install-card" id="installCard" role="dialog" aria-modal="true" aria-labelledby="installTitle" aria-describedby="installText" tabindex="-1">
+      <img class="install-icon" src="./images/Icon 192x192.png" alt="">
+      <h2 class="install-title" id="installTitle">Install SchoolCore</h2>
+      <p class="install-text" id="installText"></p>
+      <div class="install-steps" id="installSteps" hidden></div>
+      <button class="install-button" id="installAction" type="button" hidden>Install now</button>
+    </div>
+  </div>
+  <script src="./loading.js"></script>
+  <script src="./assets/js/welcome.js"></script>
+</body>
+</html>

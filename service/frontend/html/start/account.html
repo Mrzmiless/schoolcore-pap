@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#10322D">
+  <title>SchoolCore — Account</title>
+  <script src="../../assets/js/account-embedded.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=MuseoModerno:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../assets/css/cards.css">
+  <link rel="stylesheet" href="../../assets/css/account.css">
+  <link rel="stylesheet" href="../../assets/css/notice.css">
+  <link rel="stylesheet" href="../../assets/css/loading-overlay.css">
+  <link rel="stylesheet" href="../../assets/css/theme.css">
+</head>
+<body>
+  <header class="topbar">
+    <img src="../../image.png" alt="SchoolCore">
+    <h1>User</h1>
+  </header>
+  <main>
+    <section class="card" id="home" hidden>
+      <h1 id="home-title">Welcome to SchoolCore</h1>
+      <details class="account-section" id="account-section" name="user-sections">
+        <summary>Dados da conta</summary>
+        <dl class="account-details">
+          <div><dt>Account ID</dt><dd><span class="private-field" id="private-id" data-state="hidden"><span class="private-placeholder" aria-label="Hidden">Private information</span><span class="private-value" id="account-id" aria-hidden="true"></span></span> <button type="button" class="reveal" id="reveal-id" aria-label="Show account ID" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-6.5 10-6.5 10 6.5 10 6.5-3.5 6.5-10 6.5S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/><path class="reveal-slash" d="M4 4l16 16"/></svg></button></dd></div>
+          <div><dt>Username</dt><dd id="account-username"></dd></div>
+          <div><dt>First name</dt><dd id="account-first-name"></dd></div>
+          <div><dt>Last name</dt><dd id="account-last-name"></dd></div>
+          <div><dt>Email</dt><dd><span class="private-field" id="private-email" data-state="hidden"><span class="private-placeholder" aria-label="Hidden">Private information</span><span class="private-value" id="account-email" aria-hidden="true"></span></span> <button type="button" class="reveal" id="reveal-email" aria-label="Show email" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-6.5 10-6.5 10 6.5 10 6.5-3.5 6.5-10 6.5S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/><path class="reveal-slash" d="M4 4l16 16"/></svg></button></dd></div>
+          <div><dt>Phone number</dt><dd><span class="private-field" id="private-phone" data-state="hidden"><span class="private-placeholder" aria-label="Hidden">Private information</span><span class="private-value" id="account-phone" aria-hidden="true"></span></span> <button type="button" class="reveal" id="reveal-phone" aria-label="Show phone number" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-6.5 10-6.5 10 6.5 10 6.5-3.5 6.5-10 6.5S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/><path class="reveal-slash" d="M4 4l16 16"/></svg></button></dd></div>
+          <div><dt>Grade</dt><dd id="account-grade"></dd></div>
+          <div><dt>Class</dt><dd id="account-class"></dd></div>
+          <div><dt>Role</dt><dd id="account-role"></dd></div>
+          <div><dt>Date of birth</dt><dd id="account-birth"></dd></div>
+          <div><dt>Account created</dt><dd id="account-created"></dd></div>
+          <div><dt>Account status</dt><dd id="account-status"></dd></div>
+          <div><dt>Introduction completed</dt><dd id="account-intro"></dd></div>
+        </dl>
+      </details>
+      <details class="account-section" id="settings-section" name="user-sections">
+        <summary>Definições da app</summary>
+        <form id="preferences-form">
+          <fieldset disabled id="preferences-fields">
+            <fieldset class="settings-group">
+              <legend>Aparência</legend>
+              <label for="setting-theme">Tema</label>
+              <select id="setting-theme" name="theme">
+                <option value="normal">Normal</option>
+                <option value="light">Claro</option>
+                <option value="amoled">AMOLED</option>
+              </select>
+              <label class="settings-toggle" for="setting-blur">
+                <span>Blur da barra de navegação</span>
+                <input id="setting-blur" name="navbar_blur" type="checkbox">
+              </label>
+            </fieldset>
+            <fieldset class="settings-group">
+              <legend>Acessibilidade</legend>
+              <label for="setting-motion">Animações</label>
+              <select id="setting-motion" name="motion">
+                <option value="system">Seguir o dispositivo</option>
+                <option value="reduced">Reduzir animações</option>
+              </select>
+              <label for="setting-text-size">Tamanho do texto</label>
+              <select id="setting-text-size" name="text_size">
+                <option value="normal">Normal</option>
+                <option value="large">Maior</option>
+              </select>
+            </fieldset>
+            <button id="reset-preferences" type="button">Repor definições</button>
+          </fieldset>
+        </form>
+        <p id="preferences-status" role="status" aria-live="polite"></p>
+      </details>
+      <details class="account-section" id="security-section" name="user-sections">
+        <summary>Segurança</summary>
+        <div class="security-content">
+          <form id="security-unlock-form">
+            <p>Confirma a password da tua conta para alterar os dados de segurança.</p>
+            <label for="security-current-password">Password atual</label>
+            <input id="security-current-password" type="password" autocomplete="current-password" maxlength="256" required>
+            <button type="submit">Desbloquear</button>
+          </form>
+          <div id="security-controls" hidden>
+            <p>Acesso válido durante 5 minutos.</p>
+            <form id="security-email-form">
+              <label for="security-email">Novo email</label>
+              <input id="security-email" type="email" autocomplete="email" maxlength="254" required>
+              <button type="submit">Alterar email</button>
+            </form>
+            <form id="security-password-form">
+              <label for="security-new-password">Nova password (mínimo 12 caracteres)</label>
+              <input id="security-new-password" type="password" autocomplete="new-password" minlength="12" maxlength="256" required>
+              <label for="security-confirm-password">Confirmar nova password</label>
+              <input id="security-confirm-password" type="password" autocomplete="new-password" minlength="12" maxlength="256" required>
+              <p>A alteração termina a sessão em todos os dispositivos.</p>
+              <button type="submit">Alterar password</button>
+            </form>
+          </div>
+          <p id="security-status" role="status" aria-live="polite"></p>
+        </div>
+      </details>
+      <button id="logout" type="button">Sign out</button>
+    </section>
+    <p id="status" role="status" aria-live="polite">Loading…</p>
+  </main>
+  <nav class="navigation" aria-label="Main navigation">
+    <button type="button" disabled title="School information is coming soon">SInfo</button>
+    <button type="button" disabled title="Bar is coming soon">Bar</button>
+    <a href="./HomePage.html">Home</a>
+    <button type="button" disabled title="Lunch booking is coming soon">Lunch</button>
+    <a href="./account.html" aria-current="page">User</a>
+  </nav>
+  <script src="../../loading.js"></script>
+  <script src="../../assets/js/preferences.js"></script>
+  <script src="../../assets/js/account.js"></script>
+  <script src="../../assets/js/security.js"></script>
+</body>
+</html>

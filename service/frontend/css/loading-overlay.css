@@ -1,0 +1,15 @@
+html { touch-action: manipulation; }
+.schoolcore-loading { position: fixed; inset: 0; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 24px; background: #10322D; color: #fff; font: 700 18px 'Trebuchet MS', sans-serif; text-align: center; opacity: 0; transition: opacity .12s ease; }
+.schoolcore-loading[hidden] { display: none; }
+.schoolcore-loading.is-visible { opacity: 1; }
+.schoolcore-loading img { width: min(260px, 70vw, 38vh); aspect-ratio: 1; object-fit: contain; }
+.schoolcore-loading__spinner { width: 32px; height: 32px; margin-top: 24px; border: 3px solid rgba(255,255,255,.25); border-top-color: #c9ffdb; border-radius: 50%; animation: schoolcore-spin .8s linear infinite; }
+.schoolcore-loading p { margin: 18px 0 0; }
+.schoolcore-loading [hidden] { display: none !important; }
+.schoolcore-loading__error { margin-top: 24px; width: 54px; height: 54px; border: 3px solid #ffaaaa; border-radius: 50%; color: #ffaaaa; font: 400 42px/45px sans-serif; }
+.schoolcore-loading__back { margin-top: 24px; padding: 12px 34px; border: 0; border-radius: 24px; background: #597d6e; color: white; font: inherit; cursor: pointer; }
+.schoolcore-loading__back:focus-visible { outline: 3px solid white; outline-offset: 3px; }
+@keyframes schoolcore-spin { to { transform: rotate(360deg); } }
+@keyframes schoolcore-page-in { from { opacity: 0; } to { opacity: 1; } }
+body.schoolcore-animate-main > main { animation: schoolcore-page-in .16s ease; }
+@media (prefers-reduced-motion: reduce) { .schoolcore-loading { transition: none; } .schoolcore-loading__spinner, body.schoolcore-animate-main > main { animation: none; } }

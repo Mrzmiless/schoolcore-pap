@@ -6,7 +6,7 @@ from unittest.mock import MagicMock, patch
 import httpx
 from bson import ObjectId
 
-import load_test
+from tools import load_test
 
 
 class LoadTestTests(unittest.TestCase):

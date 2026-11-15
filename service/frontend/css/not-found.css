@@ -1,0 +1,6 @@
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--sc-background); color: var(--sc-text); font-family: 'Trebuchet MS', sans-serif; }
+main { width: min(100%, 480px); margin: 0 auto; padding: 36px 24px 100px; }
+section { padding: 26px; border-radius: 22px; background: var(--sc-surface); }
+h1 { color: var(--sc-accent); font-size: 22px; }
+p { line-height: 1.5; }
