@@ -16,17 +16,27 @@ Somente os diretórios públicos de CSS e JavaScript são disponibilizados em `/
 
 O CSS antigo, sem referências internas nas páginas atuais, foi preservado em `frontend/css/legacy-style.css` e continua disponível no endereço `/style.css`; a sua remoção requer uma verificação de utilizações externas.
 
+## Versão em execução e atualização
+
+Ao iniciar o servidor, os ficheiros do frontend são lidos para uma versão em memória. Alterar, acrescentar ou apagar esses ficheiros no disco não muda a versão servida até reiniciar o processo. O código Python também requer reinício; a base MongoDB e as alterações dos utilizadores continuam persistentes e não fazem parte desta cópia. Os ficheiros são servidos com `Cache-Control: no-store` para que uma atualização da página após o reinício peça a versão nova ao servidor. Uma página que já esteja aberta continua com o código carregado até ser atualizada; caches ou service workers antigos de instalações anteriores podem interferir até serem atualizados. Com vários processos, reinicia todos com os mesmos ficheiros para evitar versões diferentes.
+
+Nas páginas da SchoolCore, desliza para baixo quando o conteúdo estiver no topo para mostrar o indicador e atualizar a app. A atualização recarrega a página e pode descartar formulários por guardar. Em conteúdo incorporado da própria SchoolCore atualiza a página principal; o navegador não permite detetar gestos dentro do GIAE externo, onde podes usar **Recarregar GIAE** ou deslizar na área da SchoolCore fora do site. A resposta ao gesto pode variar entre navegadores e dispositivos.
+
 ## Preferências da conta
 
 Em User, as definições de tema, blur da navegação, movimento e tamanho do texto são guardadas automaticamente na conta. O servidor valida as opções e guarda-as no documento do utilizador; contas existentes sem preferências usam o tema normal, blur ativado, movimento do dispositivo e tamanho normal. O tema pessoal aplica-se após iniciar sessão, incluindo a página principal e o conteúdo incorporado; a entrada e o login mantêm o aspeto normal. As preferências não são guardadas no armazenamento local do dispositivo. Se a gravação falhar, a interface informa o utilizador e repõe a última escolha confirmada.
 
 ## PWA e ligação
 
-A app continua instalável, mas requer ligação ao servidor. O service worker de migração remove as caches antigas com prefixo `minha-pwa-v` e não interceta pedidos. Em instalações existentes, a limpeza só acontece quando o dispositivo estiver online e receber a atualização; outras caches não são afetadas. Na abertura da app instalada, um splash verifica a sessão e encaminha diretamente para a conta ou para o login.
+A app continua instalável, mas requer ligação ao servidor. O service worker de migração remove as caches antigas com prefixo `minha-pwa-v` e não interceta pedidos. Em instalações existentes, a limpeza só acontece quando o dispositivo estiver online e receber a atualização; outras caches não são afetadas. Na abertura, um splash verifica a sessão: se existir, encaminha diretamente para a conta; caso contrário, mostra as boas-vindas e o botão Continue. A transição para o login partilha o botão nos browsers compatíveis, com uma animação alternativa nos restantes e sem movimento quando o dispositivo o pede.
 
 ## Segurança da conta
 
 Em User → Segurança, a password atual é necessária para desbloquear alterações durante cinco minutos, apenas na sessão atual. Fechar a secção tenta bloquear imediatamente; o servidor impõe sempre a expiração. A alteração do email é imediata e ainda não tem verificação por email. A nova password tem de ter entre 12 e 256 caracteres; ao alterá-la, todas as sessões são invalidadas, incluindo a atual. A limitação de tentativas de reautenticação é aplicada tanto por IP como por conta. O ID, email e telefone aparecem ocultos por defeito, com um efeito de blur; este evita exposição visual, mas não é uma proteção contra quem já tem acesso à sessão. Passkeys e recuperação de conta ainda não estão implementadas.
+
+## Lunch e GIAE
+
+A aba Lunch tenta apresentar `https://giae.aeb.pt/` num painel incorporado; as opções **Recarregar GIAE** e **Abrir no navegador** estão sempre disponíveis nessa aba. Recarregar volta à página inicial do GIAE. O início de sessão é feito diretamente no GIAE: a SchoolCore não recolhe nem guarda as credenciais e não faz login automático. O painel mantém-se carregado ao trocar de aba, mas a sessão pode depender das regras do GIAE e do navegador, incluindo o bloqueio de cookies de terceiros. Se a incorporação ou o login falhar, usa o link externo. Terminar a sessão da SchoolCore não termina necessariamente a sessão do GIAE. A configuração de segurança permite incorporar apenas este domínio externo na página principal.
 
 ## Desenvolvimento local
 
@@ -68,7 +78,7 @@ Faltam ainda políticas de conta, recuperação de password, auditoria, backups,
 pip install -r requirements-test.txt
 python -m unittest discover -s tests
 # Opcional, com Node.js instalado: testes da PWA e interface
-node --test tests/test_service_worker.js tests/test_offline_ui.js tests/test_preferences_ui.js tests/test_navigation.js tests/test_security_ui.js
+node --test tests/test_service_worker.js tests/test_offline_ui.js tests/test_preferences_ui.js tests/test_navigation.js tests/test_security_ui.js tests/test_welcome_transition.js tests/test_refresh.js
 ```
 
 ## Teste de carga local

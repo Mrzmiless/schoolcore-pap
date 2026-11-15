@@ -9,7 +9,7 @@ body { margin: 0; min-height: 100%; overflow: hidden; background: var(--fundo); 
 .logo { position: absolute; top: 22.4138%; left: 50%; transform: translateX(-50%); width: min(100vw, 46.1823dvh, 375px); aspect-ratio: 1 / 1; background: url('../../image.png') center / cover no-repeat; }
 .text-2 { position: absolute; top: 75.2%; left: 50%; width: min(90%, 244px); transform: translateX(-50%); margin: 0; color: #fff; font-size: 18px; font-weight: 700; line-height: 1.4; text-align: center; }
 /* No modelo 375 x 812, o botão fica a 45 px da margem inferior. */
-.continuar { position: absolute; left: 50%; bottom: max(5.54dvh, calc(env(safe-area-inset-bottom, 0px) + 16px)); transform: translateX(-50%); display: flex; align-items: center; justify-content: center; width: min(256px, calc(100% - 48px)); height: 49px; border: 0; border-radius: 25px; background: var(--botao); color: #fff; font: 700 18px/1.2 'MuseoModerno', 'Trebuchet MS', sans-serif; text-align: center; text-decoration: none; cursor: pointer; }
+.continuar { position: absolute; left: 50%; bottom: max(5.54dvh, calc(env(safe-area-inset-bottom, 0px) + 16px)); transform: translateX(-50%); display: flex; align-items: center; justify-content: center; gap: 12px; width: min(256px, calc(100% - 48px)); height: 49px; border: 0; border-radius: 25px; background: var(--botao); color: #fff; font: 700 18px/1.2 'MuseoModerno', 'Trebuchet MS', sans-serif; text-align: center; text-decoration: none; cursor: pointer; view-transition-name: auth-button; }
 .continuar:focus-visible { outline: 3px solid white; outline-offset: 4px; }
 .startup-splash { position: fixed; inset: 0; z-index: 100; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #10322d; color: white; font: 700 18px 'Trebuchet MS', sans-serif; text-align: center; }
 .startup-splash[hidden], .startup-splash [hidden] { display: none; }
@@ -17,8 +17,14 @@ body { margin: 0; min-height: 100%; overflow: hidden; background: var(--fundo); 
 .startup-splash button { min-height: 48px; padding: 10px 24px; border: 0; border-radius: 24px; background: #597d6e; color: white; font: inherit; cursor: pointer; }
 .startup-splash button:focus-visible { outline: 3px solid white; outline-offset: 3px; }
 @media (display-mode: standalone), (display-mode: fullscreen) {
-  #startup-splash[hidden] { display: flex; }
+  html:not(.startup-checked) #startup-splash[hidden] { display: flex; }
 }
+@view-transition { navigation: auto; }
+::view-transition-old(root) { animation: auth-slide-out .28s ease both; }
+::view-transition-new(root) { animation: auth-slide-in .28s ease both; }
+::view-transition-group(auth-button) { animation-duration: .28s; animation-timing-function: ease; }
+@keyframes auth-slide-out { to { transform: translateX(-15%); opacity: 0; } }
+@keyframes auth-slide-in { from { transform: translateX(15%); opacity: 0; } }
 .continuar:active { transform: translateX(-50%) scale(.98); filter: brightness(1.08); }
 @media (hover: hover) { .continuar:hover { filter: brightness(1.1); } }
 @media (prefers-reduced-motion: no-preference) {
@@ -28,6 +34,7 @@ body { margin: 0; min-height: 100%; overflow: hidden; background: var(--fundo); 
   @keyframes welcome-logo-in { from { opacity: 0; transform: translate(-50%, 14px) scale(.97); } to { opacity: 1; transform: translate(-50%, 0) scale(1); } }
   @keyframes welcome-text-in { from { opacity: 0; transform: translate(-50%, 8px); } to { opacity: 1; transform: translate(-50%, 0); } }
   @keyframes welcome-button-in { from { opacity: 0; transform: translate(-50%, 10px); } to { opacity: 1; transform: translate(-50%, 0); } }
+  .group-1.is-leaving { animation: auth-slide-out .18s ease both; pointer-events: none; }
 }
 @media (max-height: 440px) {
   .logo { top: 10%; width: min(60dvh, 240px); }
@@ -52,4 +59,4 @@ body { margin: 0; min-height: 100%; overflow: hidden; background: var(--fundo); 
 .install-button:active { filter: brightness(1.12); }
 @keyframes install-fade { from { opacity: 0; } to { opacity: 1; } }
 @keyframes install-pop { from { opacity: 0; transform: translateY(14px) scale(.97); } to { opacity: 1; transform: translateY(0) scale(1); } }
-@media (prefers-reduced-motion: reduce) { .install-overlay, .install-card { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .install-overlay, .install-card { animation: none; } ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*) { animation-duration: .01ms; } }

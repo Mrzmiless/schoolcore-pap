@@ -19,6 +19,7 @@
   <link rel="stylesheet" href="./assets/css/welcome.css">
   <link rel="stylesheet" href="./assets/css/notice.css">
   <link rel="stylesheet" href="./assets/css/loading-overlay.css">
+  <link rel="stylesheet" href="./assets/css/refresh.css">
 </head>
 <body>
   <div id="startup-splash" class="startup-splash" hidden role="status" aria-live="polite">
@@ -31,8 +32,7 @@
     <div class="logo">
       <p class="text-2">A space for everyone</p>
     </div>
-    <!-- O servidor encaminha para o login se a sessão já não for válida. -->
-    <a class="continuar" href="./pages/start/index.html">Continue</a>
+    <a class="continuar" href="./pages/login/index.html"><span>Continue</span></a>
   </main>
   <!-- Popup de instalação: o conteúdo muda conforme o dispositivo (Android, iOS ou computador). -->
   <div class="install-overlay" id="installOverlay" hidden>
@@ -46,5 +46,6 @@
   </div>
   <script src="./loading.js"></script>
   <script src="./assets/js/welcome.js"></script>
+  <script src="./assets/js/refresh.js"></script>
 </body>
 </html>

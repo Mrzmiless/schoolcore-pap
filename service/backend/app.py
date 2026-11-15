@@ -1,9 +1,8 @@
 """Aplicação FastAPI e cabeçalhos de segurança."""
 from fastapi import FastAPI, Request
-from fastapi.staticfiles import StaticFiles
 
 from . import api, pages
-from .config import BASE
+from .frontend_snapshot import frontend
 
 app = FastAPI(title='SchoolCore', docs_url=None, redoc_url=None, openapi_url=None)
 
@@ -11,6 +10,7 @@ app = FastAPI(title='SchoolCore', docs_url=None, redoc_url=None, openapi_url=Non
 @app.middleware('http')
 async def security_headers(request: Request, call_next):
     response = await call_next(request)
+    frame_sources = "'self' https://giae.aeb.pt" if request.url.path == '/pages/start/HomePage.html' else "'self'"
     response.headers['X-Content-Type-Options'] = 'nosniff'
     response.headers['X-Frame-Options'] = 'SAMEORIGIN'
     response.headers['Referrer-Policy'] = 'no-referrer'
@@ -19,7 +19,7 @@ async def security_headers(request: Request, call_next):
         "default-src 'self'; script-src 'self' 'unsafe-inline'; "
         "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
         "font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; "
-        "connect-src 'self'; frame-src 'self'; object-src 'none'; "
+        f"connect-src 'self'; frame-src {frame_sources}; object-src 'none'; "
         "base-uri 'self'; frame-ancestors 'self'; form-action 'self'"
     )
     if request.url.path.startswith('/api/'):
@@ -28,6 +28,16 @@ async def security_headers(request: Request, call_next):
 
 
 app.include_router(api.router)
-app.mount('/assets/css', StaticFiles(directory=BASE / 'frontend' / 'css'), name='css')
-app.mount('/assets/js', StaticFiles(directory=BASE / 'frontend' / 'js'), name='js')
+
+
+@app.api_route('/assets/css/{filename:path}', methods=['GET', 'HEAD'])
+def css_asset(filename: str):
+    return frontend.response('css/' + filename)
+
+
+@app.api_route('/assets/js/{filename:path}', methods=['GET', 'HEAD'])
+def js_asset(filename: str):
+    return frontend.response('js/' + filename)
+
+
 app.include_router(pages.router)

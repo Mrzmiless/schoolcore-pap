@@ -1,3 +1,13 @@
+try {
+  if (sessionStorage.getItem('schoolcore:welcome-transition') === '1') {
+    sessionStorage.removeItem('schoolcore:welcome-transition');
+    if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) document.body.classList.add('auth-arriving');
+  }
+} catch (error) { /* Navigation still works when storage is unavailable. */ }
+window.addEventListener('pageshow', (event) => {
+  if (event.persisted) document.body.classList.remove('auth-arriving');
+});
+
 document.getElementById('login-form').addEventListener('submit', async (event) => {
   event.preventDefault();
   const form = event.currentTarget;

@@ -1,36 +1,34 @@
 """Páginas e ficheiros públicos, com controlo de acesso explícito."""
 from fastapi import APIRouter, HTTPException, Request
-from fastapi.responses import FileResponse, RedirectResponse
+from fastapi.responses import RedirectResponse
 
 from .auth import current_user
-from .config import BASE
+from .frontend_snapshot import frontend
 
 router = APIRouter()
-HTML = BASE / 'frontend' / 'html'
-FRONTEND = BASE / 'frontend'
 PUBLIC_FILES = {
-    'index.html': HTML / 'index.html',
-    'sw.js': FRONTEND / 'pwa' / 'sw.js',
-    'manifest.webmanifest': FRONTEND / 'pwa' / 'manifest.webmanifest',
-    'image.png': FRONTEND / 'assets' / 'image.png',
-    'style.css': FRONTEND / 'css' / 'legacy-style.css',
-    'loading.js': FRONTEND / 'js' / 'loading.js',
+    'index.html': 'html/index.html',
+    'sw.js': 'pwa/sw.js',
+    'manifest.webmanifest': 'pwa/manifest.webmanifest',
+    'image.png': 'assets/image.png',
+    'style.css': 'css/legacy-style.css',
+    'loading.js': 'js/loading.js',
 }
 
 
 @router.get('/')
 def index():
-    return FileResponse(HTML / 'index.html')
+    return frontend.response('html/index.html')
 
 
 @router.get('/pages/login/index.html')
 def login_page():
-    return FileResponse(HTML / 'login' / 'index.html')
+    return frontend.response('html/login/index.html')
 
 
 @router.get('/pages/start/loading.html')
 def loading_page():
-    return FileResponse(HTML / 'start' / 'loading.html')
+    return frontend.response('html/start/loading.html')
 
 
 @router.get('/pages/start/index.html')
@@ -43,7 +41,7 @@ def start_page(request: Request):
         raise
     if user.get('is_first_login_done') is True:
         return RedirectResponse('/pages/start/HomePage.html', status_code=303, headers={'Cache-Control': 'no-store'})
-    return FileResponse(HTML / 'start' / 'index.html', headers={'Cache-Control': 'no-store'})
+    return frontend.response('html/start/index.html')
 
 
 def authenticated_start_page(request: Request, filename: str):
@@ -55,7 +53,7 @@ def authenticated_start_page(request: Request, filename: str):
         raise
     if user.get('is_first_login_done') is not True:
         return RedirectResponse('/pages/start/index.html', status_code=303, headers={'Cache-Control': 'no-store'})
-    return FileResponse(HTML / 'start' / filename, headers={'Cache-Control': 'no-store'})
+    return frontend.response('html/start/' + filename)
 
 
 @router.get('/pages/start/HomePage.html')
@@ -82,11 +80,11 @@ def unavailable_page(request: Request):
 def public_file(filename: str):
     if filename not in PUBLIC_FILES:
         raise HTTPException(404)
-    return FileResponse(PUBLIC_FILES[filename])
+    return frontend.response(PUBLIC_FILES[filename])
 
 
 @router.get('/images/{filename}')
 def image(filename: str):
     if filename not in {'Icon 192x192.png', 'Icon 512x512.png', 'Icon 2000x2000.png'}:
         raise HTTPException(404)
-    return FileResponse(FRONTEND / 'assets' / 'icons' / filename)
+    return frontend.response('assets/icons/' + filename)

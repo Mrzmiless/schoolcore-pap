@@ -1,0 +1,8 @@
+html { overscroll-behavior-y: contain; }
+.schoolcore-refresh { position: fixed; z-index: 20000; top: max(8px, env(safe-area-inset-top, 0px)); left: 50%; display: flex; align-items: center; gap: 8px; max-width: calc(100% - 32px); padding: 9px 14px; border: 1px solid var(--sc-border, rgba(255,255,255,.25)); border-radius: 22px; background: var(--sc-surface, #173f38); color: var(--sc-text, #fff); box-shadow: 0 4px 16px rgba(0,0,0,.2); font: 700 13px/1.3 'Trebuchet MS', sans-serif; pointer-events: none; opacity: 0; transform: translate(-50%, -125%); transition: transform .14s ease, opacity .14s ease; }
+.schoolcore-refresh.is-visible { opacity: 1; transform: translate(-50%, 0); }
+.schoolcore-refresh__icon { display: inline-block; font-size: 18px; line-height: 1; }
+.schoolcore-refresh.is-refreshing .schoolcore-refresh__icon { animation: schoolcore-refresh-spin .7s linear infinite; }
+@keyframes schoolcore-refresh-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .schoolcore-refresh, .schoolcore-refresh__icon { transition: none; animation: none !important; } }
+:root[data-motion="reduced"] .schoolcore-refresh, :root[data-motion="reduced"] .schoolcore-refresh__icon { transition: none; animation: none !important; }

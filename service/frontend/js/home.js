@@ -2,6 +2,14 @@ const frame = document.getElementById('page-frame');
 const content = document.getElementById('content');
 const indicator = document.getElementById('nav-indicator');
 const navigation = document.querySelector('.navigation');
+const lunchPanel = document.getElementById('lunch-panel');
+const lunchFrame = document.getElementById('lunch-frame');
+let lunchStarted = false;
+const giaeUrl = 'https://giae.aeb.pt/';
+document.getElementById('lunch-retry').addEventListener('click', () => {
+  lunchStarted = true;
+  lunchFrame.src = giaeUrl;
+});
 
 let navTimer;
 let keyboardFocus = false;
@@ -31,7 +39,7 @@ const pages = {
   sinfo: { url: './not-found.html?page=sinfo', title: 'School Info', position: 0 },
   bar: { url: './not-found.html?page=bar', title: 'Bar', position: 1 },
   home: { url: './home-content.html', title: 'Home', position: 2 },
-  lunch: { url: './not-found.html?page=lunch', title: 'Lunch', position: 3 },
+  lunch: { title: 'Lunch', position: 3 },
   user: { url: './account.html?embedded=1', title: 'User', position: 4 }
 };
 let activePage = 'home';
@@ -42,13 +50,24 @@ function navigate(page) {
   const selected = pages[page];
   indicator.style.transform = 'translateX(' + (selected.position * 100) + '%)';
   document.getElementById('page-title').textContent = selected.title;
-  frame.title = selected.title;
+  frame.hidden = page === 'lunch';
+  lunchPanel.hidden = page !== 'lunch';
   document.querySelectorAll('[data-page]').forEach((link) => {
     if (link.dataset.page === page) link.setAttribute('aria-current', 'page');
     else link.removeAttribute('aria-current');
   });
-  content.classList.add('is-loading');
   content.classList.remove('has-error');
+  if (page === 'lunch') {
+    content.classList.remove('is-loading');
+    content.setAttribute('aria-busy', 'false');
+    if (!lunchStarted) {
+      lunchStarted = true;
+      lunchFrame.src = giaeUrl;
+    }
+    return;
+  }
+  frame.title = selected.title;
+  content.classList.add('is-loading');
   document.getElementById('content-loading').textContent = 'Loading…';
   content.setAttribute('aria-busy', 'true');
   frame.src = selected.url;
@@ -96,6 +115,7 @@ function pageFromHash() {
 window.addEventListener('hashchange', () => navigate(pageFromHash()));
 window.addEventListener('message', (event) => {
   if (event.origin !== location.origin || event.source !== frame.contentWindow || !event.data) return;
+  if (event.data.type === 'schoolcore:refresh') { window.location.reload(); return; }
   if (event.data.type === 'schoolcore:navigate' && event.data.page === 'user') location.hash = 'user';
   if (event.data.type === 'schoolcore:preferences') window.schoolcorePreferences.apply(event.data.preferences);
 });

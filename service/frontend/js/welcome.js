@@ -25,8 +25,8 @@ if ('serviceWorker' in navigator) {
       window.navigator.standalone === true;
   }
 
-  // Na app instalada, retomar diretamente uma sessão ainda válida.
-  if (isStandalone()) {
+  // Uma sessão válida vai diretamente para a conta; sem sessão mostramos as boas-vindas.
+  {
     const splash = document.getElementById('startup-splash');
     const message = document.getElementById('startup-message');
     const retry = document.getElementById('startup-retry');
@@ -36,7 +36,11 @@ if ('serviceWorker' in navigator) {
       message.textContent = 'Logging in…';
       try {
         const response = await fetch('./api/me', { cache: 'no-store' });
-        if (response.status === 401) { window.location.replace('./pages/login/index.html'); return; }
+        if (response.status === 401) {
+          document.documentElement.classList.add('startup-checked');
+          splash.hidden = true;
+          return;
+        }
         if (!response.ok) throw new Error();
         const user = await response.json();
         window.location.replace(user.is_first_login_done ? './pages/start/HomePage.html' : './pages/start/index.html');
@@ -49,6 +53,21 @@ if ('serviceWorker' in navigator) {
     retry.addEventListener('click', resume);
     resume();
   }
+
+  const continueLink = document.querySelector('.continuar');
+  continueLink.addEventListener('click', (event) => {
+    const crossDocumentTransitions = 'onpageswap' in window && 'onpagereveal' in window &&
+      window.CSS && window.CSS.supports('view-transition-name', 'auth-button');
+    if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey ||
+        crossDocumentTransitions || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    event.preventDefault();
+    try { sessionStorage.setItem('schoolcore:welcome-transition', '1'); } catch (error) { /* Animation is optional. */ }
+    document.querySelector('.group-1').classList.add('is-leaving');
+    window.setTimeout(() => window.location.assign(continueLink.href), 180);
+  });
+  window.addEventListener('pageshow', (event) => {
+    if (event.persisted) document.querySelector('.group-1').classList.remove('is-leaving');
+  });
 
   function getPlatform() {
     const ua = navigator.userAgent || '';

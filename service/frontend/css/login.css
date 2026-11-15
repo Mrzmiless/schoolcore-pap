@@ -19,7 +19,13 @@ body { min-width: 280px; min-height: 100%; margin: 0; background: var(--fundo); 
 .termos p { margin: 0; }
 .login-status { margin: 12px 0 0; color: var(--titulo); font-size: 12px; text-align: center; line-height: 1.5; }
 .login-status:empty { display: none; }
-.loginbutton { display: flex; align-items: center; justify-content: center; width: min(234px, 100%); height: 49px; flex-shrink: 0; margin: auto auto 0; padding: 0 12px; border: 0; border-radius: 20px; background: var(--campo); color: #fff; font: 700 14px/1.2 'MuseoModerno', 'Trebuchet MS', sans-serif; cursor: pointer; }
+.loginbutton { display: flex; align-items: center; justify-content: center; gap: 12px; width: min(234px, 100%); height: 49px; flex-shrink: 0; margin: auto auto 0; padding: 0 12px; border: 0; border-radius: 20px; background: var(--campo); color: #fff; font: 700 14px/1.2 'MuseoModerno', 'Trebuchet MS', sans-serif; cursor: pointer; view-transition-name: auth-button; }
+@view-transition { navigation: auto; }
+::view-transition-old(root) { animation: auth-slide-out .28s ease both; }
+::view-transition-new(root) { animation: auth-slide-in .28s ease both; }
+::view-transition-group(auth-button) { animation-duration: .28s; animation-timing-function: ease; }
+@keyframes auth-slide-out { to { transform: translateX(-15%); opacity: 0; } }
+@keyframes auth-slide-in { from { transform: translateX(15%); opacity: 0; } }
 .loginbutton:focus-visible { outline: 3px solid white; outline-offset: 3px; }
 .loginbutton:active { transform: scale(.98); filter: brightness(1.08); }
 @media (hover: hover) { .loginbutton:not(:disabled):hover { filter: brightness(1.1); } }
@@ -34,4 +40,8 @@ body { min-width: 280px; min-height: 100%; margin: 0; background: var(--fundo); 
   .loginbutton { transition: filter .12s ease, transform .12s ease; }
   @keyframes login-header-in { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
   @keyframes login-content-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+  .auth-arriving .inicio { animation: auth-slide-in .24s ease both; }
+  .auth-arriving .loginbutton { animation: auth-button-arrive .24s ease-out both; }
+  @keyframes auth-button-arrive { from { transform: scaleX(1.1); } to { transform: scaleX(1); } }
 }
+@media (prefers-reduced-motion: reduce) { ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*) { animation-duration: .01ms; } }
