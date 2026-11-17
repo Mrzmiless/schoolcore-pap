@@ -98,6 +98,21 @@ class PostsTests(unittest.TestCase):
         date = self.client.get('/api/posts').json()['posts'][0]['created_at']
         self.assertEqual(datetime.fromisoformat(date).utcoffset(), timedelta(0))
 
+    def test_listing_includes_older_posts_without_an_author(self):
+        now = datetime.now(timezone.utc)
+        self.posts.extend([
+            {'_id': ObjectId(), 'title': 'Older', 'body': 'Old text', 'created_at': now},
+            {'_id': ObjectId(), 'title': 'Newer', 'body': 'New text', 'author': 'alex',
+             'created_at': now + timedelta(seconds=1)},
+        ])
+        response = self.client.get('/api/posts?limit=20&offset=0')
+        self.assertEqual(response.status_code, 200)
+        posts = response.json()['posts']
+        self.assertEqual([post['title'] for post in posts], ['Newer', 'Older'])
+        self.assertEqual(posts[0]['author'], 'alex')
+        self.assertIsNone(posts[1]['author'])
+        self.assertNotIn('author', self.posts[0])
+
     def test_database_failure_is_reported(self):
         self.db.posts.find.side_effect = ServerSelectionTimeoutError('offline')
         self.assertEqual(self.client.get('/api/posts').status_code, 503)

@@ -132,6 +132,20 @@ test('the list can load all pages of posts', async () => {
   assert.equal(app.get('posts-more').hidden, true);
 });
 
+test('posts without an author still display their date and content', async () => {
+  const entry = { id: '1', title: 'Older notice', body: 'Message', author: null, created_at: '2024-02-29T10:00:00Z' };
+  const app = setup({ initialPosts: [entry] });
+  await flush();
+  assert.equal(app.get('latest-title').textContent, 'Older notice');
+  assert.match(app.get('latest-meta').textContent, /2024/);
+  app.get('open-posts').handlers.click();
+  await flush();
+  const card = app.get('posts-list').children[0];
+  assert.equal(card.children[0].textContent, 'Older notice');
+  assert.match(card.children[1].textContent, /2024/);
+  assert.equal(card.children[2].textContent, 'Message');
+});
+
 test('language changes update the greeting and calendar without modifying post content', async () => {
   const entry = { id: '1', title: 'School notice', body: 'Hello', author: 'alex', created_at: '2024-02-29T10:00:00Z' };
   const app = setup({ initialPosts: [entry] });

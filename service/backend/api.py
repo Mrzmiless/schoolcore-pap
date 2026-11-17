@@ -54,7 +54,7 @@ def public_post(post):
     if created_at.tzinfo is None:
         created_at = created_at.replace(tzinfo=timezone.utc)
     return {'id': str(post['_id']), 'title': post['title'], 'body': post['body'],
-            'author': post['author'], 'created_at': created_at}
+            'author': post.get('author'), 'created_at': created_at}
 
 
 @router.get('/api/posts')
