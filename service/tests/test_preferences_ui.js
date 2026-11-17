@@ -6,7 +6,7 @@ const vm = require('node:vm');
 
 const source = fs.readFileSync(path.join(__dirname, '..', 'frontend', 'js', 'account.js'), 'utf8');
 const preferencesSource = fs.readFileSync(path.join(__dirname, '..', 'frontend', 'js', 'preferences.js'), 'utf8');
-const defaults = { theme: 'normal', navbar_blur: true, motion: 'system', text_size: 'normal' };
+const defaults = { theme: 'normal', navbar_blur: true, motion: 'system', text_size: 'normal', language: 'en' };
 const flush = () => new Promise(resolve => setImmediate(resolve));
 
 function setup() {
@@ -158,7 +158,7 @@ test('a delayed initial load does not overwrite a newer theme preview', async ()
   const fetch = () => new Promise(resolve => { finishFetch = resolve; });
   const meta = { setAttribute(name, value) { this[name] = value; } };
   const document = { documentElement: { dataset: {} }, querySelector: () => meta };
-  const window = {};
+  const window = { addEventListener() {} };
   vm.runInNewContext(preferencesSource, { document, window, fetch });
   window.schoolcorePreferences.apply({ ...defaults, theme: 'amoled', navbar_blur: false });
   finishFetch({ ok: true, json: async () => ({ ...defaults, theme: 'light' }) });
@@ -166,4 +166,35 @@ test('a delayed initial load does not overwrite a newer theme preview', async ()
   assert.equal(document.documentElement.dataset.theme, 'amoled');
   assert.equal(document.documentElement.dataset.blur, 'off');
   assert.equal(meta.content, '#000000');
+});
+
+test('language changes are saved and failed changes restore the saved language', async () => {
+  const app = setup();
+  await flush();
+  app.get('setting-language').value = 'pt-PT';
+  app.get('preferences-form').handlers.change();
+  assert.equal(app.requests[0].payload.language, 'pt-PT');
+  assert.equal(app.previews.at(-1).language, 'pt-PT');
+  app.requests[0].reject(new Error('offline'));
+  await flush();
+  assert.equal(app.get('setting-language').value, 'en');
+  assert.equal(app.previews.at(-1).language, 'en');
+});
+
+test('embedded preferences only accept messages from their same-origin parent', () => {
+  const handlers = {};
+  const parent = {};
+  const document = { documentElement: { dataset: {} }, querySelector: () => null };
+  const window = { parent, location: { origin: 'https://school.test' },
+    addEventListener: (name, handler) => { handlers[name] = handler; } };
+  const fetch = () => new Promise(() => {});
+  vm.runInNewContext(preferencesSource, { document, window, fetch });
+  const send = (origin, source) => handlers.message({
+    origin, source, data: { type: 'schoolcore:preferences', preferences: { ...defaults, language: 'pt-PT' } }
+  });
+  send('https://evil.test', parent);
+  send('https://school.test', {});
+  assert.equal(window.schoolcorePreferences.current(), undefined);
+  send('https://school.test', parent);
+  assert.equal(window.schoolcorePreferences.current().language, 'pt-PT');
 });

@@ -1,5 +1,6 @@
 // Shared loading screen for navigation and asynchronous operations.
 (function () {
+  const translate = (key) => window.schoolcoreI18n ? window.schoolcoreI18n.t(key) : key;
   const minimumDuration = 0;
   const imageUrl = new URL('image.png', document.currentScript.src).href;
   let overlay;
@@ -22,13 +23,13 @@
       noticeText = document.createElement('p');
       const dismiss = document.createElement('button');
       dismiss.type = 'button';
-      dismiss.setAttribute('aria-label', 'Dismiss notification');
+      dismiss.setAttribute('aria-label', translate('Dismiss notification'));
       dismiss.textContent = '×';
       dismiss.addEventListener('click', () => { notice.hidden = true; });
       notice.append(noticeText, dismiss);
       document.body.appendChild(notice);
     }
-    noticeText.textContent = message;
+    noticeText.textContent = translate(message);
     notice.hidden = false;
   }
 
@@ -77,7 +78,7 @@
     backButton = document.createElement('button');
     backButton.type = 'button';
     backButton.className = 'schoolcore-loading__back';
-    backButton.textContent = 'Back';
+    backButton.textContent = translate('Back');
     backButton.hidden = true;
     backButton.addEventListener('click', async () => {
       await window.schoolcoreLoading.hide();

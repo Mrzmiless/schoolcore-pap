@@ -65,6 +65,15 @@ class AccountSecurityTests(unittest.TestCase):
     def unlock(self, password='original-password'):
         return self.client.post('/api/security/unlock', headers=self.origin, json={'password': password})
 
+    def test_invalid_or_missing_password_hash_does_not_crash_login(self):
+        for value in ('not-an-argon-hash', None):
+            with self.subTest(value=value):
+                self.user['password_hash'] = value
+                self.assertEqual(self.login().status_code, 401)
+        del self.user['password_hash']
+        self.assertEqual(self.login().status_code, 401)
+        self.assertEqual(self.sessions, {})
+
     def test_security_requires_password_session_origin_and_expiry(self):
         self.assertEqual(self.client.post('/api/security/unlock', headers=self.origin, json={'password': 'wrong'}).status_code, 401)
         self.assertEqual(self.login().status_code, 200)

@@ -11,6 +11,7 @@ class Preferences(BaseModel):
     navbar_blur: StrictBool = True
     motion: Literal['system', 'reduced'] = 'system'
     text_size: Literal['normal', 'large'] = 'normal'
+    language: Literal['pt-PT', 'en'] = 'en'
 
 
 class PreferencesUpdate(Preferences):
@@ -18,6 +19,8 @@ class PreferencesUpdate(Preferences):
     navbar_blur: StrictBool
     motion: Literal['system', 'reduced']
     text_size: Literal['normal', 'large']
+    # Older clients do not send a language; leave the stored choice untouched.
+    language: Literal['pt-PT', 'en'] | None = None
 
 
 def preferences_for(user):

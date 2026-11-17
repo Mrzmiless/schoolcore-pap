@@ -20,6 +20,26 @@ a:focus-visible { outline: 3px solid var(--sc-focus); outline-offset: 2px; }
 .account-section summary::after { content: '+'; position: absolute; right: 16px; font-size: 1.25em; line-height: 1; }
 .account-section[open] summary::after { content: '−'; }
 .account-section summary:focus-visible { outline: 3px solid var(--sc-focus); outline-offset: 2px; border-radius: 12px; }
+/* A secção fecha semanticamente logo; a animação nunca atrasa o bloqueio de segurança. */
+@supports selector(details::details-content) and (interpolate-size: allow-keywords) {
+  .account-section { interpolate-size: allow-keywords; }
+  .account-section::details-content {
+    block-size: 0;
+    overflow: clip;
+    transition: block-size .22s ease, content-visibility .22s allow-discrete;
+  }
+  .account-section[open]::details-content { block-size: auto; }
+}
+@supports not (selector(details::details-content) and (interpolate-size: allow-keywords)) {
+  @media (prefers-reduced-motion: no-preference) {
+    .account-section[open] > :not(summary) { animation: section-enter .18s ease-out both; }
+    @keyframes section-enter { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .account-section::details-content { transition: none !important; }
+}
+:root[data-motion="reduced"] .account-section::details-content { transition: none !important; }
 .account-details { margin: 0 16px 16px; }
 #preferences-form { padding: 0 16px; }
 #preferences-fields { min-width: 0; margin: 0; padding: 0; border: 0; }

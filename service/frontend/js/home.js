@@ -43,13 +43,20 @@ const pages = {
   user: { url: './account.html?embedded=1', title: 'User', position: 4 }
 };
 let activePage = 'home';
+function updatePageTitle() {
+  const title = pages[activePage].title;
+  const translated = window.schoolcoreI18n ? window.schoolcoreI18n.t(title) : title;
+  document.getElementById('page-title').textContent = translated;
+  frame.title = translated;
+}
+window.addEventListener('schoolcore:language', updatePageTitle);
 
 function navigate(page) {
   if (!pages[page] || page === activePage) return;
   activePage = page;
   const selected = pages[page];
   indicator.style.transform = 'translateX(' + (selected.position * 100) + '%)';
-  document.getElementById('page-title').textContent = selected.title;
+  updatePageTitle();
   frame.hidden = page === 'lunch';
   lunchPanel.hidden = page !== 'lunch';
   document.querySelectorAll('[data-page]').forEach((link) => {
@@ -66,9 +73,8 @@ function navigate(page) {
     }
     return;
   }
-  frame.title = selected.title;
   content.classList.add('is-loading');
-  document.getElementById('content-loading').textContent = 'Loading…';
+  document.getElementById('content-loading').textContent = window.schoolcoreI18n ? window.schoolcoreI18n.t('Loading…') : 'Loading…';
   content.setAttribute('aria-busy', 'true');
   frame.src = selected.url;
 }
@@ -85,10 +91,14 @@ function frameLoaded() {
       content.classList.add('is-loading');
       content.classList.add('has-error');
       content.setAttribute('aria-busy', 'false');
-      document.getElementById('content-loading').textContent = 'Could not load this page. Restart the server and try again.';
+      document.getElementById('content-loading').textContent = window.schoolcoreI18n ? window.schoolcoreI18n.t('Could not load this page. Restart the server and try again.') : 'Could not load this page. Restart the server and try again.';
       return;
     }
   } catch (error) { /* The iframe may be inaccessible during navigation. */ }
+  const preferences = window.schoolcorePreferences?.current?.();
+  if (preferences && frame.contentWindow) {
+    frame.contentWindow.postMessage({ type: 'schoolcore:preferences', preferences }, location.origin);
+  }
   content.classList.remove('is-loading');
   content.setAttribute('aria-busy', 'false');
 }
@@ -102,7 +112,7 @@ setTimeout(() => {
     document.getElementById('home-splash').hidden = true;
     content.classList.add('has-error');
     content.setAttribute('aria-busy', 'false');
-    document.getElementById('content-loading').textContent = 'Could not load this page. Refresh to try again.';
+    document.getElementById('content-loading').textContent = window.schoolcoreI18n ? window.schoolcoreI18n.t('Could not load this page. Refresh to try again.') : 'Could not load this page. Refresh to try again.';
   }
 }, 15000);
 document.querySelectorAll('[data-page]').forEach((link) => {

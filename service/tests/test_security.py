@@ -123,6 +123,27 @@ class SecurityTests(unittest.TestCase):
                     self.assertTrue(response.content)
             self.assertEqual(client.get('/images/other.png').status_code, 404)
 
+    def test_mobile_orientation_and_viewport_settings_on_all_pages(self):
+        paths = ('/', '/pages/login/index.html', '/pages/start/index.html',
+                 '/pages/start/HomePage.html', '/pages/start/account.html',
+                 '/pages/start/home-content.html', '/pages/start/not-found.html',
+                 '/pages/start/loading.html')
+        with TestClient(launch.app) as client, \
+             patch.object(pages, 'current_user', side_effect=lambda request: {
+                 'is_first_login_done': request.url.path != '/pages/start/index.html'
+             }):
+            self.assertEqual(client.get('/manifest.webmanifest').json()['orientation'], 'portrait')
+            for path in paths:
+                with self.subTest(path=path):
+                    response = client.get(path)
+                    self.assertIn('user-scalable=no', response.text)
+                    self.assertIn('maximum-scale=1', response.text)
+                    self.assertIn('assets/css/refresh.css', response.text)
+                    self.assertIn('assets/js/refresh.js', response.text)
+            css = client.get('/assets/css/refresh.css').text
+            self.assertIn('(orientation: landscape) and (pointer: coarse)', css)
+            self.assertIn('Please rotate your device to portrait.', css)
+
     def test_pages_reference_existing_local_assets(self):
         paths = ('/', '/index.html', '/pages/login/index.html', '/pages/start/index.html', '/pages/start/HomePage.html',
                  '/pages/start/account.html', '/pages/start/home-content.html',
@@ -151,7 +172,7 @@ class SecurityTests(unittest.TestCase):
             self.assertNotIn("addEventListener('fetch'", worker.text)
 
     def test_preference_defaults_and_invalid_legacy_values(self):
-        expected = {'theme': 'normal', 'navbar_blur': True, 'motion': 'system', 'text_size': 'normal'}
+        expected = {'theme': 'normal', 'navbar_blur': True, 'motion': 'system', 'text_size': 'normal', 'language': 'en'}
         self.assertEqual(preferences_for({}).model_dump(), expected)
         self.assertEqual(preferences_for({'preferences': None}).model_dump(), expected)
         self.assertEqual(preferences_for({'preferences': {'theme': 'light', 'navbar_blur': 'yes',
@@ -159,7 +180,7 @@ class SecurityTests(unittest.TestCase):
                          {**expected, 'theme': 'light'})
 
     def test_preferences_require_session_and_validate_updates(self):
-        values = {'theme': 'amoled', 'navbar_blur': False, 'motion': 'reduced', 'text_size': 'large'}
+        values = {'theme': 'amoled', 'navbar_blur': False, 'motion': 'reduced', 'text_size': 'large', 'language': 'pt-PT'}
         with TestClient(launch.app, base_url='https://localhost') as client, \
              patch.dict(os.environ, {'APP_ORIGIN': 'https://localhost'}):
             self.assertEqual(client.get('/api/preferences').status_code, 401)
@@ -177,6 +198,7 @@ class SecurityTests(unittest.TestCase):
                 self.assertEqual(client.post('/api/preferences', json=values,
                                              headers={'Origin': 'https://evil.test'}).status_code, 403)
                 for invalid in ({**values, 'theme': 'other'}, {**values, 'navbar_blur': 'false'},
+                                {**values, 'language': 'fr'}, {**values, 'language': None},
                                 {**values, 'role': 'admin'}, {'theme': 'light'}):
                     self.assertEqual(client.post('/api/preferences', json=invalid,
                                                  headers={'Origin': 'https://localhost'}).status_code, 422)
@@ -188,7 +210,39 @@ class SecurityTests(unittest.TestCase):
                 self.assertEqual(response.headers['cache-control'], 'no-store')
                 db.users.update_one.assert_called_once_with(
                     {'_id': 'my-id', 'is_active': {'$ne': False}},
-                    {'$set': {'preferences': values}})
+                    {'$set': {f'preferences.{key}': value for key, value in values.items()}})
+                # An older client must not erase the stored language.
+                db.users.update_one.reset_mock()
+                user['preferences'] = {'language': 'pt-PT'}
+                legacy = {key: value for key, value in values.items() if key != 'language'}
+                response = client.post('/api/preferences', json=legacy, headers={'Origin': 'https://localhost'})
+                self.assertEqual(response.status_code, 200)
+                self.assertEqual(response.json()['language'], 'pt-PT')
+                self.assertNotIn('preferences.language', db.users.update_one.call_args.args[1]['$set'])
+
+    def test_language_is_persisted_and_survives_legacy_client_updates(self):
+        user = {'_id': 'user', 'username': 'test'}
+        db = MagicMock()
+        def update_user(query, update):
+            stored = user.setdefault('preferences', {})
+            for key, value in update['$set'].items():
+                stored[key.removeprefix('preferences.')] = value
+            return MagicMock(matched_count=1)
+        db.users.update_one.side_effect = update_user
+        settings = {'theme': 'normal', 'navbar_blur': True, 'motion': 'system',
+                    'text_size': 'normal', 'language': 'pt-PT'}
+        with TestClient(launch.app, base_url='https://localhost') as client, \
+             patch.dict(os.environ, {'APP_ORIGIN': 'https://localhost'}), \
+             patch.object(api, 'current_user', return_value=user), patch.object(api, 'db', db):
+            self.assertEqual(client.post('/api/preferences', json=settings,
+                                         headers={'Origin': 'https://localhost'}).status_code, 200)
+            self.assertEqual(client.get('/api/preferences').json()['language'], 'pt-PT')
+            old_client = {key: value for key, value in settings.items() if key != 'language'}
+            old_client['theme'] = 'light'
+            self.assertEqual(client.post('/api/preferences', json=old_client,
+                                         headers={'Origin': 'https://localhost'}).status_code, 200)
+            self.assertEqual(client.get('/api/preferences').json()['language'], 'pt-PT')
+            self.assertEqual(client.get('/api/preferences').json()['theme'], 'light')
 
     def test_welcome_dependencies_exist(self):
         with TestClient(launch.app) as client:

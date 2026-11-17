@@ -1,6 +1,6 @@
 # Backend SchoolCore (fase inicial)
 
-Este backend implementa autenticação e encaminha o utilizador para uma página inicial provisória; as funcionalidades escolares ainda não existem.
+Este backend implementa autenticação, preferências e publicações escolares. As restantes funcionalidades escolares ainda estão em desenvolvimento.
 
 ## Organização do código
 
@@ -26,9 +26,17 @@ Nas páginas da SchoolCore, desliza para baixo quando o conteúdo estiver no top
 
 Em User, as definições de tema, blur da navegação, movimento e tamanho do texto são guardadas automaticamente na conta. O servidor valida as opções e guarda-as no documento do utilizador; contas existentes sem preferências usam o tema normal, blur ativado, movimento do dispositivo e tamanho normal. O tema pessoal aplica-se após iniciar sessão, incluindo a página principal e o conteúdo incorporado; a entrada e o login mantêm o aspeto normal. As preferências não são guardadas no armazenamento local do dispositivo. Se a gravação falhar, a interface informa o utilizador e repõe a última escolha confirmada.
 
+Em User → Definições da app, o idioma pode ser Português (Portugal) ou English. A escolha aplica-se imediatamente e é guardada na conta, ficando disponível nos outros dispositivos. Na página de login, o idioma começa em inglês e pode ser alterado no seletor; esta escolha não altera a preferência guardada na conta. Na página de boas-vindas, a interface segue o idioma do dispositivo quando é português e usa inglês nos restantes casos. Contas antigas sem idioma guardado usam inglês. A opção de repor definições também repõe o idioma para inglês. O site externo GIAE mantém o idioma definido pelo próprio serviço.
+
+## Página inicial e publicações
+
+A Home mostra uma saudação baseada na hora local, a publicação mais recente e um calendário mensal sem eventos. Ao abrir as publicações, todos os utilizadores autenticados podem consultar a lista; contas com perfil `admin` podem criar publicações com título e mensagem. As publicações são guardadas no MongoDB e apresentadas como texto simples. Ainda não existe edição nem eliminação na app. As animações das secções da conta e dos cartões respeitam a opção de movimento reduzido.
+
 ## PWA e ligação
 
 A app continua instalável, mas requer ligação ao servidor. O service worker de migração remove as caches antigas com prefixo `minha-pwa-v` e não interceta pedidos. Em instalações existentes, a limpeza só acontece quando o dispositivo estiver online e receber a atualização; outras caches não são afetadas. Na abertura, um splash verifica a sessão: se existir, encaminha diretamente para a conta; caso contrário, mostra as boas-vindas e o botão Continue. A transição para o login partilha o botão nos browsers compatíveis, com uma animação alternativa nos restantes e sem movimento quando o dispositivo o pede.
+
+A PWA pede orientação vertical; em dispositivos táteis que não respeitem esse pedido, uma mensagem pede para rodar o ecrã. O zoom é desativado através da configuração do viewport nos navegadores que o respeitam. Algumas plataformas ignoram estas restrições por motivos de acessibilidade e os conteúdos externos, como o GIAE, são controlados pelo respetivo site. Impedir o zoom também pode dificultar a utilização por pessoas com dificuldades visuais.
 
 ## Segurança da conta
 
@@ -59,6 +67,8 @@ python launch.py serve
 Em instalações anteriores, o ficheiro `service/.env` continua a ser aceite quando `service/config/.env` não existe. Para migrar, move o ficheiro antigo para `service/config/.env`, sem o substituir se já existir outro. Se os dois existirem, o servidor e o teste de carga recusam escolher automaticamente; confirma qual deves manter antes de continuar. Variáveis de ambiente já definidas continuam a ter prioridade sobre os valores do ficheiro.
 
 Por defeito o servidor usa a porta 8080. O comando de criação pede username, nome, apelido, email, telefone, ano, turma, perfil, data de nascimento e password. Email, telefone, ano e turma são opcionais; deixa a resposta vazia se não se aplicarem. O ano é guardado como número e o telefone como texto. A data é guardada como data BSON, a password como hash Argon2 e a conta começa ativa, com a introdução por concluir. Os usernames são únicos e distinguem maiúsculas de minúsculas. Para testar noutro dispositivo, configura `HOST=0.0.0.0` e `APP_ORIGIN` com o endereço exato de acesso; a instalação PWA necessita de HTTPS ou localhost.
+
+Se o login indicar que não foi possível guardar a sessão, verifica se o navegador permite cookies e se o acesso usa HTTPS. Para testes locais isolados em HTTP, configura `COOKIE_SECURE=false`; nunca uses essa opção com dados reais ou numa rede não segura.
 
 Contas antigas sem perfil ou estado são tratadas como alunos ativos; sem a marca de introdução concluída, veem-na no próximo acesso. Contas com `is_active: false` ou um perfil inválido não podem iniciar nem manter sessão. Ainda não existem funcionalidades específicas nem permissões adicionais para cada perfil, nem alteração obrigatória de password no primeiro login.
 

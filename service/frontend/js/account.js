@@ -4,6 +4,7 @@ const preferencesForm = document.getElementById('preferences-form');
 const preferencesFields = document.getElementById('preferences-fields');
 const preferencesStatus = document.getElementById('preferences-status');
 const sections = document.querySelectorAll('.account-section');
+const translate = (text, params) => window.schoolcoreI18n ? window.schoolcoreI18n.t(text, params) : text.replace(/\{(\w+)\}/g, (_, key) => params?.[key] ?? '');
 let savedPreferences;
 let desiredPreferences;
 let savingPreferences = false;
@@ -19,6 +20,7 @@ function showPreferences(preferences) {
   document.getElementById('setting-blur').checked = preferences.navbar_blur;
   document.getElementById('setting-motion').value = preferences.motion;
   document.getElementById('setting-text-size').value = preferences.text_size;
+  document.getElementById('setting-language').value = preferences.language;
 }
 
 function previewPreferences(preferences) {
@@ -33,13 +35,14 @@ function readPreferences() {
     theme: document.getElementById('setting-theme').value,
     navbar_blur: document.getElementById('setting-blur').checked,
     motion: document.getElementById('setting-motion').value,
-    text_size: document.getElementById('setting-text-size').value
+    text_size: document.getElementById('setting-text-size').value,
+    language: document.getElementById('setting-language').value
   };
 }
 
 function samePreferences(left, right) {
   return left.theme === right.theme && left.navbar_blur === right.navbar_blur &&
-    left.motion === right.motion && left.text_size === right.text_size;
+    left.motion === right.motion && left.text_size === right.text_size && left.language === right.language;
 }
 
 async function savePreferences() {
@@ -48,7 +51,7 @@ async function savePreferences() {
   try {
     while (!samePreferences(savedPreferences, desiredPreferences)) {
       const sent = { ...desiredPreferences };
-      preferencesStatus.textContent = 'A guardar…';
+      preferencesStatus.textContent = translate('A guardar…');
       const response = await fetch('../../api/preferences', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -62,12 +65,12 @@ async function savePreferences() {
       if (!response.ok) throw new Error('Could not save preferences');
       savedPreferences = await response.json();
     }
-    preferencesStatus.textContent = 'Guardado.';
+    preferencesStatus.textContent = translate('Guardado.');
   } catch (error) {
     desiredPreferences = { ...savedPreferences };
     showPreferences(desiredPreferences);
     previewPreferences(desiredPreferences);
-    preferencesStatus.textContent = 'Não foi possível guardar. Tenta novamente.';
+    preferencesStatus.textContent = translate('Não foi possível guardar. Tenta novamente.');
   } finally {
     savingPreferences = false;
   }
@@ -81,7 +84,7 @@ preferencesForm.addEventListener('change', () => {
   savePreferences();
 });
 document.getElementById('reset-preferences').addEventListener('click', () => {
-  if (!savedPreferences || !window.confirm('Repor as definições da app?')) return;
+  if (!savedPreferences || !window.confirm(translate('Repor as definições da app?'))) return;
   desiredPreferences = { ...window.schoolcorePreferences.defaults };
   showPreferences(desiredPreferences);
   previewPreferences(desiredPreferences);
@@ -90,7 +93,7 @@ document.getElementById('reset-preferences').addEventListener('click', () => {
 
 window.schoolcorePreferences.ready.then((preferences) => {
   if (!preferences) {
-    preferencesStatus.textContent = 'Não foi possível carregar as definições. Atualiza a página para tentar novamente.';
+    preferencesStatus.textContent = translate('Não foi possível carregar as definições. Atualiza a página para tentar novamente.');
     return;
   }
   savedPreferences = { ...preferences };
@@ -100,7 +103,7 @@ window.schoolcorePreferences.ready.then((preferences) => {
 });
 
 function displayValue(id, value) {
-  document.getElementById(id).textContent = value || 'Not available';
+  document.getElementById(id).textContent = value || translate('Not available');
 }
 
 const privateValues = {};
@@ -113,10 +116,10 @@ for (const [key, label] of [['id', 'account ID'], ['email', 'email'], ['phone', 
     const visible = button.getAttribute('aria-pressed') !== 'true';
     clearTimeout(concealTimer);
     button.setAttribute('aria-pressed', String(visible));
-    button.setAttribute('aria-label', (visible ? 'Hide ' : 'Show ') + label);
+    button.setAttribute('aria-label', translate((visible ? 'Hide ' : 'Show ') + label));
     value.setAttribute('aria-hidden', String(!visible));
     if (visible) {
-      value.textContent = privateValues[key] || 'Not available';
+      value.textContent = privateValues[key] || translate('Not available');
       field.setAttribute('data-state', 'revealed');
     } else {
       const conceal = () => { field.setAttribute('data-state', 'hidden'); value.textContent = ''; };
@@ -131,12 +134,32 @@ for (const [key, label] of [['id', 'account ID'], ['email', 'email'], ['phone', 
 }
 
 function displayDate(value) {
-  if (!value) return 'Not available';
+  if (!value) return translate('Not available');
   // Older accounts may store the date as DD/MM/YYYY instead of BSON date.
   if (/^\d{2}\/\d{2}\/\d{4}$/.test(value)) return value;
   const date = new Date(value);
-  return Number.isNaN(date.getTime()) ? 'Not available' : date.toLocaleDateString('en-GB', { timeZone: 'UTC' });
+  return Number.isNaN(date.getTime()) ? translate('Not available') : date.toLocaleDateString(window.schoolcoreI18n?.getLanguage() === 'pt-PT' ? 'pt-PT' : 'en-GB', { timeZone: 'UTC' });
 }
+
+let loadedUser;
+function renderUser(user) {
+  document.getElementById('home-title').textContent = translate('Hello, {name}!', { name: user.first_name || user.username });
+  displayValue('account-username', user.username);
+  displayValue('account-first-name', user.first_name);
+  displayValue('account-last-name', user.last_name);
+  displayValue('account-grade', user.grade);
+  displayValue('account-class', user.class);
+  for (const [key, label] of [['id', 'account ID'], ['email', 'email'], ['phone', 'phone number']]) {
+    const button = document.getElementById('reveal-' + key);
+    button.setAttribute('aria-label', translate((button.getAttribute('aria-pressed') === 'true' ? 'Hide ' : 'Show ') + label));
+  }
+  displayValue('account-role', translate(({ aluno: 'Student', professor: 'Teacher', admin: 'Administrator' })[user.role] || user.role || 'Not available'));
+  displayValue('account-birth', displayDate(user.date_of_birth));
+  displayValue('account-created', displayDate(user.created_at));
+  displayValue('account-status', translate(user.is_active ? 'Active' : 'Disabled'));
+  displayValue('account-intro', translate(user.is_first_login_done ? 'Yes' : 'No'));
+}
+window.addEventListener('schoolcore:language', () => { if (loadedUser) renderUser(loadedUser); });
 
 async function loadUser() {
   try {
@@ -144,39 +167,29 @@ async function loadUser() {
     if (response.status === 401) { window.location.replace('../login/index.html'); return; }
     if (!response.ok) throw new Error();
     const user = await response.json();
-    const name = user.first_name || user.username;
-    document.getElementById('home-title').textContent = 'Hello, ' + name + '!';
+    loadedUser = user;
+    renderUser(user);
     privateValues.id = user.id;
-    displayValue('account-username', user.username);
-    displayValue('account-first-name', user.first_name);
-    displayValue('account-last-name', user.last_name);
     privateValues.email = user.email;
     privateValues.phone = user.phone_number;
-    displayValue('account-grade', user.grade);
-    displayValue('account-class', user.class);
-    displayValue('account-role', ({ aluno: 'Student', professor: 'Teacher', admin: 'Administrator' })[user.role] || user.role);
-    displayValue('account-birth', displayDate(user.date_of_birth));
-    displayValue('account-created', displayDate(user.created_at));
-    displayValue('account-status', user.is_active ? 'Active' : 'Disabled');
-    displayValue('account-intro', user.is_first_login_done ? 'Yes' : 'No');
     home.hidden = false;
     status.textContent = '';
   } catch (error) {
-    status.textContent = 'Could not load your account. Refresh the page to try again.';
+    status.textContent = translate('Could not load your account. Refresh the page to try again.');
   }
 }
 
 document.getElementById('logout').addEventListener('click', async (event) => {
   const button = event.currentTarget;
   button.disabled = true;
-  window.schoolcoreLoading.show('Signing out...');
+  window.schoolcoreLoading.show(translate('Signing out...'));
   try {
     const response = await fetch('../../api/logout', { method: 'POST' });
     if (!response.ok) throw new Error();
     await window.schoolcoreLoading.wait();
     (window.self !== window.top ? window.top : window).location.replace('../login/index.html');
   } catch (error) {
-    status.textContent = 'Could not sign out. Please try again.';
+    status.textContent = translate('Could not sign out. Please try again.');
     await window.schoolcoreLoading.hide();
     button.disabled = false;
   }

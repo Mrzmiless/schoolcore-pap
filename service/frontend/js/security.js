@@ -1,4 +1,5 @@
 (function () {
+  const translate = (key) => window.schoolcoreI18n ? window.schoolcoreI18n.t(key) : key;
   const section = document.getElementById('security-section');
   const unlock = document.getElementById('security-unlock-form');
   const controls = document.getElementById('security-controls');
@@ -18,7 +19,7 @@
     controls.hidden = true;
     unlock.hidden = false;
     current.value = email.value = password.value = confirm.value = '';
-    status.textContent = message;
+    status.textContent = translate(message);
   }
   function lock() {
     const wasUnlocked = unlocked;
@@ -36,7 +37,7 @@
     const button = unlock.querySelector('button');
     button.disabled = true;
     const attempt = generation;
-    status.textContent = 'A verificar…';
+    status.textContent = translate('A verificar…');
     try {
       const response = await post('unlock', { password: current.value });
       current.value = '';
@@ -45,16 +46,16 @@
         return;
       }
       if (!response.ok) {
-        status.textContent = response.status === 429 ? 'Demasiadas tentativas. Aguarda e tenta novamente.' : response.status === 401 ? 'Password incorreta ou sessão expirada.' : 'Não foi possível verificar. Tenta novamente.';
+        status.textContent = translate(response.status === 429 ? 'Demasiadas tentativas. Aguarda e tenta novamente.' : response.status === 401 ? 'Password incorreta ou sessão expirada.' : 'Não foi possível verificar. Tenta novamente.');
         return;
       }
       unlocked = true;
       unlock.hidden = true;
       controls.hidden = false;
       status.textContent = '';
-      timer = setTimeout(() => { lock(); status.textContent = 'Acesso expirado. Confirma novamente a password.'; }, 300000);
+      timer = setTimeout(() => { lock(); status.textContent = translate('Acesso expirado. Confirma novamente a password.'); }, 300000);
       email.focus();
-    } catch (error) { if (attempt === generation) status.textContent = 'Não foi possível contactar o servidor.'; }
+    } catch (error) { if (attempt === generation) status.textContent = translate('Não foi possível contactar o servidor.'); }
     finally { button.disabled = false; }
   });
   document.getElementById('security-email-form').addEventListener('submit', async (event) => {
@@ -68,14 +69,14 @@
       const data = await response.json();
       window.dispatchEvent(new CustomEvent('schoolcore:email-changed', { detail: data.email }));
       email.value = '';
-      status.textContent = 'Email atualizado.';
-    } catch (error) { status.textContent = 'Não foi possível alterar o email.'; }
+      status.textContent = translate('Email atualizado.');
+    } catch (error) { status.textContent = translate('Não foi possível alterar o email.'); }
     finally { button.disabled = false; }
   });
   document.getElementById('security-password-form').addEventListener('submit', async (event) => {
     event.preventDefault();
-    if (password.value !== confirm.value) { status.textContent = 'As passwords não coincidem.'; return; }
-    if (!window.confirm('Alterar a password e terminar todas as sessões?')) return;
+    if (password.value !== confirm.value) { status.textContent = translate('As passwords não coincidem.'); return; }
+    if (!window.confirm(translate('Alterar a password e terminar todas as sessões?'))) return;
     const button = event.currentTarget.querySelector('button');
     button.disabled = true;
     try {
@@ -84,7 +85,7 @@
       if (!response.ok) throw new Error();
       reset();
       (window.self !== window.top ? window.top : window).location.replace('/pages/login/index.html');
-    } catch (error) { status.textContent = 'Não foi possível confirmar a alteração. Tenta iniciar sessão com a nova password.'; }
+    } catch (error) { status.textContent = translate('Não foi possível confirmar a alteração. Tenta iniciar sessão com a nova password.'); }
     finally { button.disabled = false; }
   });
 })();

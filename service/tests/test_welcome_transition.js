@@ -9,7 +9,7 @@ const welcomeSource = fs.readFileSync(path.join(directory, 'js', 'welcome.js'), 
 const loginSource = fs.readFileSync(path.join(directory, 'js', 'login.js'), 'utf8');
 const flush = () => new Promise(resolve => setImmediate(resolve));
 
-function setup({ status = 401, onboarded = true, standalone = true, reduced = false, native = false, failure = false } = {}) {
+function setup({ status = 401, onboarded = true, standalone = true, reduced = false, native = false, failure = false, hangs = false } = {}) {
   const elements = {};
   const windowHandlers = {};
   const timers = [];
@@ -37,17 +37,19 @@ function setup({ status = 401, onboarded = true, standalone = true, reduced = fa
     matchMedia: query => ({ matches: query.includes('reduced-motion') ? reduced : standalone,
       addEventListener() {} }),
     addEventListener(name, callback) { windowHandlers[name] = callback; },
-    setTimeout(callback, delay) { timers.push({ callback, delay }); },
+    setTimeout(callback, delay) { const timer = { callback, delay }; timers.push(timer); return timer; },
+    clearTimeout(timer) { const index = timers.indexOf(timer); if (index !== -1) timers.splice(index, 1); },
     location: { replace: value => navigations.push(value), assign: value => navigations.push(value) }
   };
   if (native) { window.onpageswap = null; window.onpagereveal = null; window.CSS = { supports: () => true }; }
   const sessionStorage = { setItem: (key, value) => storage.set(key, value),
     getItem: key => storage.get(key), removeItem: key => storage.delete(key) };
-  const fetch = async () => {
+  const fetch = async (url, options) => {
+    if (hangs) return new Promise((resolve, reject) => options.signal.addEventListener('abort', () => reject(new Error('aborted'))));
     if (failure) throw new Error('unavailable');
     return { status, ok: status === 200, json: async () => ({ is_first_login_done: onboarded }) };
   };
-  vm.runInNewContext(welcomeSource, { document, window, navigator, fetch, sessionStorage });
+  vm.runInNewContext(welcomeSource, { document, window, navigator, fetch, sessionStorage, AbortController });
   return { get, document, root, window, navigator, windowHandlers, timers, storage, navigations, sessionStorage };
 }
 
@@ -71,6 +73,14 @@ test('connection errors offer retry instead of pretending the user is logged out
   const app = setup({ failure: true });
   await flush();
   assert.equal(app.get('startup-splash').hidden, false);
+  assert.equal(app.get('startup-retry').hidden, false);
+  assert.deepEqual(app.navigations, []);
+});
+test('a stalled session request times out and offers retry', async () => {
+  const app = setup({ hangs: true });
+  assert.equal(app.timers[0].delay, 8000);
+  app.timers[0].callback();
+  await flush();
   assert.equal(app.get('startup-retry').hidden, false);
   assert.deepEqual(app.navigations, []);
 });

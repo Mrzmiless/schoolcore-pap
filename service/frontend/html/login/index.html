@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-default-language="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no, viewport-fit=cover">
   <meta name="theme-color" content="#10322D">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -30,12 +30,19 @@
     <form class="login-form" id="login-form">
       <div class="fields">
         <div class="field">
+          <label for="login-language">Idioma</label>
+          <select id="login-language" name="language">
+            <option value="en" selected>English</option>
+            <option value="pt-PT">Português (Portugal)</option>
+          </select>
+        </div>
+        <div class="field">
           <label for="username">Username</label>
-          <input id="username" name="username" type="text" autocomplete="username" required>
+          <input id="username" name="username" type="text" autocomplete="username" maxlength="100" required>
         </div>
         <div class="field">
           <label for="password">Password</label>
-          <input id="password" name="password" type="password" autocomplete="current-password" required>
+          <input id="password" name="password" type="password" autocomplete="current-password" maxlength="256" required>
         </div>
       </div>
 
@@ -51,6 +58,7 @@ By logging in, you declare that the information provided is yours and that you a
       <button class="loginbutton" type="submit"><span>Login</span></button>
     </form>
   </main>
+  <script src="../../assets/js/i18n.js"></script>
   <script src="../../loading.js"></script>
   <script src="../../assets/js/login.js"></script>
   <script src="../../assets/js/refresh.js"></script>

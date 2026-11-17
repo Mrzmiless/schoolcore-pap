@@ -2,9 +2,9 @@
 import secrets
 from datetime import datetime, timedelta, timezone
 
-from argon2.exceptions import VerificationError
-from fastapi import APIRouter, HTTPException, Request, Response
-from pydantic import BaseModel, Field, field_validator
+from argon2.exceptions import InvalidHashError, VerificationError
+from fastapi import APIRouter, HTTPException, Query, Request, Response
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 from pymongo.errors import PyMongoError
 
 from .auth import account_allowed, current_user, hasher, require_same_origin, token_hash
@@ -41,6 +41,47 @@ class NewEmail(BaseModel):
         return value
 
 
+class NewPost(BaseModel):
+    model_config = ConfigDict(extra='forbid', str_strip_whitespace=True)
+
+    title: str = Field(min_length=1, max_length=120)
+    body: str = Field(min_length=1, max_length=5000)
+
+
+def public_post(post):
+    created_at = post['created_at']
+    # PyMongo returns naive UTC datetimes unless the client enables tz_aware.
+    if created_at.tzinfo is None:
+        created_at = created_at.replace(tzinfo=timezone.utc)
+    return {'id': str(post['_id']), 'title': post['title'], 'body': post['body'],
+            'author': post['author'], 'created_at': created_at}
+
+
+@router.get('/api/posts')
+def list_posts(request: Request, offset: int = Query(default=0, ge=0), limit: int = Query(default=20, ge=1, le=50)):
+    current_user(request)
+    try:
+        posts = list(db.posts.find().sort([('created_at', -1), ('_id', -1)]).skip(offset).limit(limit + 1))
+    except PyMongoError:
+        raise HTTPException(503, 'Database unavailable')
+    return {'posts': [public_post(post) for post in posts[:limit]], 'has_more': len(posts) > limit}
+
+
+@router.post('/api/posts', status_code=201)
+def create_post(data: NewPost, request: Request):
+    require_same_origin(request)
+    user = current_user(request)
+    if user.get('role', 'aluno') != 'admin':
+        raise HTTPException(403, 'Administrator access required')
+    post = {'title': data.title, 'body': data.body, 'author': user['username'],
+            'created_at': datetime.now(timezone.utc)}
+    try:
+        post['_id'] = db.posts.insert_one(post).inserted_id
+    except PyMongoError:
+        raise HTTPException(503, 'Database unavailable')
+    return public_post(post)
+
+
 @router.post('/api/login')
 def login(credentials: Credentials, request: Request, response: Response):
     require_same_origin(request)
@@ -53,9 +94,11 @@ def login(credentials: Credentials, request: Request, response: Response):
             raise HTTPException(401, 'Invalid credentials')
         if user.get('is_active', True) is False:
             raise HTTPException(403, 'account_disabled')
+        if not isinstance(user.get('password_hash'), str):
+            raise HTTPException(401, 'Invalid credentials')
         try:
             hasher.verify(user['password_hash'], credentials.password)
-        except VerificationError:
+        except (VerificationError, InvalidHashError):
             raise HTTPException(401, 'Invalid credentials')
         if not account_allowed(user):
             raise HTTPException(401, 'Invalid credentials')
@@ -92,9 +135,11 @@ def unlock_security(credentials: PasswordCheck, request: Request):
             allowed, retry = check_login_rate(db.login_rate_limits, key)
             if not allowed:
                 raise HTTPException(429, 'Too many attempts', headers={'Retry-After': str(retry)})
+        if not isinstance(user.get('password_hash'), str):
+            raise HTTPException(401, 'Incorrect password')
         try:
             hasher.verify(user['password_hash'], credentials.password)
-        except VerificationError:
+        except (VerificationError, InvalidHashError):
             raise HTTPException(401, 'Incorrect password')
         now = datetime.now(timezone.utc)
         result = db.sessions.update_one({'_id': token_hash(request.cookies.get(COOKIE)), 'user_id': user['_id'],
@@ -174,17 +219,20 @@ def get_preferences(request: Request):
 def update_preferences(preferences: PreferencesUpdate, request: Request):
     require_same_origin(request)
     user = current_user(request)
-    values = preferences.model_dump()
+    values = preferences.model_dump(exclude_unset=True)
+    if values.get('language', ...) is None:
+        raise HTTPException(422, 'Invalid language')
     try:
         result = db.users.update_one(
             {'_id': user['_id'], 'is_active': {'$ne': False}},
-            {'$set': {'preferences': values}},
+            {'$set': {f'preferences.{key}': value for key, value in values.items()}},
         )
     except PyMongoError:
         raise HTTPException(503, 'Database unavailable')
     if not result.matched_count:
         raise HTTPException(401, 'Invalid session')
-    return values
+    existing = preferences_for(user).model_dump()
+    return {**existing, **values}
 
 
 @router.post('/api/onboarding/complete')

@@ -1,6 +1,11 @@
 const intro = document.getElementById('intro');
 const status = document.getElementById('status');
 const complete = document.getElementById('complete');
+const translate = (key, params) => window.schoolcoreI18n ? window.schoolcoreI18n.t(key, params) : key.replace(/\{(\w+)\}/g, (_, name) => params?.[name] ?? '');
+let userName;
+window.addEventListener('schoolcore:language', () => {
+  if (userName) document.getElementById('welcome').textContent = translate('Welcome to SchoolCore, {name}!', { name: userName });
+});
 
 async function loadUser() {
   try {
@@ -12,17 +17,18 @@ async function loadUser() {
       window.location.replace('./HomePage.html');
       return;
     }
-    document.getElementById('welcome').textContent = 'Welcome to SchoolCore, ' + (user.first_name || user.username) + '!';
+    userName = user.first_name || user.username;
+    document.getElementById('welcome').textContent = translate('Welcome to SchoolCore, {name}!', { name: userName });
     intro.hidden = false;
     status.textContent = '';
   } catch (error) {
-    status.textContent = 'Could not load your account. Refresh the page to try again.';
+    status.textContent = translate('Could not load your account. Refresh the page to try again.');
   }
 }
 
 complete.addEventListener('click', async () => {
   complete.disabled = true;
-  window.schoolcoreLoading.show('Saving…');
+  window.schoolcoreLoading.show(translate('Saving…'));
   try {
     const response = await fetch('../../api/onboarding/complete', { method: 'POST' });
     if (response.status === 401) { await window.schoolcoreLoading.wait(); window.location.replace('../login/index.html'); return; }
@@ -30,7 +36,7 @@ complete.addEventListener('click', async () => {
     await window.schoolcoreLoading.wait();
     window.location.replace('./HomePage.html');
   } catch (error) {
-    status.textContent = 'Could not save. Please try again.';
+    status.textContent = translate('Could not save. Please try again.');
   } finally { await window.schoolcoreLoading.hide(); complete.disabled = false; }
 });
 

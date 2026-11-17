@@ -46,7 +46,8 @@ class FrontendSnapshotTests(unittest.TestCase):
             resolve = Path.resolve
 
             def simulated_resolve(path, *args, **kwargs):
-                return resolve(secret) if path == alias else resolve(path, *args, **kwargs)
+                resolved = resolve(path, *args, **kwargs)
+                return resolve(secret) if resolved == resolve(alias) else resolved
 
             # Simular a resolução evita depender de permissões de symlink no Windows.
             with patch.object(Path, 'resolve', autospec=True, side_effect=simulated_resolve):

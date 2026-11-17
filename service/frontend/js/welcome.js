@@ -6,6 +6,7 @@ if ('serviceWorker' in navigator) {
 
 // Popup para instalar a webapp no telemóvel.
 (function () {
+  const translate = (key, params) => window.schoolcoreI18n ? window.schoolcoreI18n.t(key, params) : key.replace(/\{(\w+)\}/g, (_, name) => params?.[name] ?? '');
   const overlay = document.getElementById('installOverlay');
   if (!overlay) return;
 
@@ -33,9 +34,11 @@ if ('serviceWorker' in navigator) {
     async function resume() {
       splash.hidden = false;
       retry.hidden = true;
-      message.textContent = 'Logging in…';
+      message.textContent = translate('Logging in…');
+      const controller = new AbortController();
+      const timeout = window.setTimeout(() => controller.abort(), 8000);
       try {
-        const response = await fetch('./api/me', { cache: 'no-store' });
+        const response = await fetch('./api/me', { cache: 'no-store', signal: controller.signal });
         if (response.status === 401) {
           document.documentElement.classList.add('startup-checked');
           splash.hidden = true;
@@ -45,9 +48,11 @@ if ('serviceWorker' in navigator) {
         const user = await response.json();
         window.location.replace(user.is_first_login_done ? './pages/start/HomePage.html' : './pages/start/index.html');
       } catch (error) {
-        message.textContent = 'Could not reach the server. Please try again.';
+        message.textContent = translate('Could not reach the server. Please try again.');
         retry.hidden = false;
         retry.focus();
+      } finally {
+        window.clearTimeout(timeout);
       }
     }
     retry.addEventListener('click', resume);
@@ -97,39 +102,39 @@ if ('serviceWorker' in navigator) {
   function render() {
     const platform = getPlatform();
     actionEl.hidden = true;
-    actionEl.textContent = 'Install now';
+    actionEl.textContent = translate('Install now');
     if (platform === 'ios') {
       const safari = isIOSSafari();
-      titleEl.textContent = safari ? 'Install on your iPhone' : 'Open in Safari';
+      titleEl.textContent = translate(safari ? 'Install on your iPhone' : 'Open in Safari');
       textEl.textContent = safari
-        ? 'Add SchoolCore to your home screen to use it as an app.'
-        : 'For the best installation experience, copy the link and open it in Safari.';
+        ? translate('Add SchoolCore to your home screen to use it as an app.')
+        : translate('For the best installation experience, copy the link and open it in Safari.');
       setSteps([
-        'Open this site in <strong>Safari</strong>.',
-        'Tap the <strong>Share</strong> button ' + SHARE_ICON + ' in the Safari toolbar.',
-        'Choose <strong>Add to Home Screen</strong>.',
-        'Tap <strong>Add</strong> to confirm.'
+        translate('Open this site in <strong>Safari</strong>.'),
+        translate('Tap the <strong>Share</strong> button {icon} in the Safari toolbar.', { icon: SHARE_ICON }),
+        translate('Choose <strong>Add to Home Screen</strong>.'),
+        translate('Tap <strong>Add</strong> to confirm.')
       ]);
       return;
     }
     if (platform === 'android') {
-      titleEl.textContent = 'Install on your phone';
-      textEl.textContent = 'Install SchoolCore to open it faster without the browser.';
+      titleEl.textContent = translate('Install on your phone');
+      textEl.textContent = translate('Install SchoolCore to open it faster without the browser.');
       if (deferredPrompt) {
         setSteps([]);
         actionEl.hidden = false;
       } else {
         setSteps([
-          'Tap the browser menu <strong>⋮</strong>.',
-          'Choose <strong>Install app</strong> or <strong>Add to Home screen</strong>.',
-          'Tap <strong>Install</strong> to confirm.'
+          translate('Tap the browser menu <strong>⋮</strong>.'),
+          translate('Choose <strong>Install app</strong> or <strong>Add to Home screen</strong>.'),
+          translate('Tap <strong>Install</strong> to confirm.')
         ]);
       }
       return;
     }
     // Computador (Windows, macOS ou Linux).
-    titleEl.textContent = 'Available on mobile only';
-    textEl.textContent = 'This service is not available on computers. Open the site on an Android phone or iPhone to install the app.';
+    titleEl.textContent = translate('Available on mobile only');
+    textEl.textContent = translate('This service is not available on computers. Open the site on an Android phone or iPhone to install the app.');
     setSteps([]);
   }
 

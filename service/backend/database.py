@@ -13,3 +13,4 @@ def ensure_indexes():
     db.users.create_index('username', unique=True)
     db.sessions.create_index('expires_at', expireAfterSeconds=0)
     db.login_rate_limits.create_index('expires_at', expireAfterSeconds=0)
+    db.posts.create_index([('created_at', -1), ('_id', -1)])
