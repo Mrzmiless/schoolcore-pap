@@ -31,7 +31,14 @@ class PostsTests(unittest.TestCase):
     def setUp(self):
         self.posts = []
         self.db = MagicMock()
-        self.db.posts.find.side_effect = lambda: Cursor(self.posts)
+        def find(query=None):
+            if not query:
+                return Cursor(self.posts)
+            date = query['$or'][0]['created_at']['$lt']
+            post_id = query['$or'][1]['_id']['$lt']
+            return Cursor(post for post in self.posts
+                          if post['created_at'] < date or (post['created_at'] == date and post['_id'] < post_id))
+        self.db.posts.find.side_effect = find
         def insert(post):
             post['_id'] = ObjectId()
             self.posts.append(post.copy())
@@ -97,6 +104,29 @@ class PostsTests(unittest.TestCase):
                            'created_at': datetime(2026, 1, 1, 12, 0)})
         date = self.client.get('/api/posts').json()['posts'][0]['created_at']
         self.assertEqual(datetime.fromisoformat(date).utcoffset(), timedelta(0))
+
+    def test_cursor_pagination_stays_stable_when_a_new_post_arrives(self):
+        now = datetime.now(timezone.utc)
+        for index in range(3):
+            self.posts.append({'_id': ObjectId(), 'title': str(index), 'body': 'Text',
+                               'created_at': now + timedelta(seconds=index)})
+        first = self.client.get('/api/posts', params={'limit': 2}).json()
+        self.posts.append({'_id': ObjectId(), 'title': 'new', 'body': 'Text',
+                           'created_at': now + timedelta(seconds=3)})
+        last = self.client.get('/api/posts', params={'limit': 2, 'cursor': first['next_cursor']}).json()
+        self.assertEqual([post['title'] for post in first['posts'] + last['posts']], ['2', '1', '0'])
+        self.assertFalse(last['has_more'])
+        self.assertIsNone(last['next_cursor'])
+        self.assertEqual(self.client.get('/api/posts', params={'cursor': 'bad'}).status_code, 422)
+        self.assertEqual(self.client.get('/api/posts', params={'cursor': first['next_cursor'], 'offset': 1}).status_code, 422)
+
+    def test_cursor_uses_id_to_order_equal_timestamps(self):
+        now = datetime.now(timezone.utc)
+        ids = sorted(ObjectId() for _ in range(3))
+        self.posts.extend({'_id': value, 'title': str(value), 'body': 'Text', 'created_at': now} for value in ids)
+        first = self.client.get('/api/posts', params={'limit': 2}).json()
+        last = self.client.get('/api/posts', params={'limit': 2, 'cursor': first['next_cursor']}).json()
+        self.assertEqual([post['id'] for post in first['posts'] + last['posts']], [str(value) for value in reversed(ids)])
 
     def test_listing_includes_older_posts_without_an_author(self):
         now = datetime.now(timezone.utc)

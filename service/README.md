@@ -20,7 +20,7 @@ O CSS antigo, sem referências internas nas páginas atuais, foi preservado em `
 
 Ao iniciar o servidor, os ficheiros do frontend são lidos para uma versão em memória. Alterar, acrescentar ou apagar esses ficheiros no disco não muda a versão servida até reiniciar o processo. O código Python também requer reinício; a base MongoDB e as alterações dos utilizadores continuam persistentes e não fazem parte desta cópia. Os ficheiros são servidos com `Cache-Control: no-store` para que uma atualização da página após o reinício peça a versão nova ao servidor. Uma página que já esteja aberta continua com o código carregado até ser atualizada; caches ou service workers antigos de instalações anteriores podem interferir até serem atualizados. Com vários processos, reinicia todos com os mesmos ficheiros para evitar versões diferentes.
 
-Nas páginas da SchoolCore, desliza para baixo quando o conteúdo estiver no topo para mostrar o indicador e atualizar a app. A atualização recarrega a página e pode descartar formulários por guardar. Em conteúdo incorporado da própria SchoolCore atualiza a página principal; o navegador não permite detetar gestos dentro do GIAE externo, onde podes usar **Recarregar GIAE** ou deslizar na área da SchoolCore fora do site. A resposta ao gesto pode variar entre navegadores e dispositivos.
+Nas páginas da SchoolCore, desliza para baixo quando o conteúdo estiver no topo para mostrar o indicador e atualizar a app. A atualização recarrega a página e pode descartar formulários por guardar. Em conteúdo incorporado da própria SchoolCore atualiza a página principal. O GIAE abre fora da app e usa a atualização do próprio navegador. A resposta ao gesto pode variar entre navegadores e dispositivos.
 
 ## Preferências da conta
 
@@ -30,13 +30,13 @@ Em User → Definições da app, o idioma pode ser Português (Portugal) ou Engl
 
 ## Página inicial e publicações
 
-A Home mostra uma saudação baseada na hora local, a publicação mais recente e um calendário mensal sem eventos. Ao abrir as publicações, todos os utilizadores autenticados podem consultar a lista; contas com perfil `admin` podem criar publicações com título e mensagem. As publicações são guardadas no MongoDB e apresentadas como texto simples. Ainda não existe edição nem eliminação na app. As animações das secções da conta e dos cartões respeitam a opção de movimento reduzido.
+A Home mostra uma saudação baseada na hora local, a publicação mais recente e um calendário mensal sem eventos. Ao abrir as publicações, todos os utilizadores autenticados podem consultar a lista; contas com perfil `admin` podem criar publicações com título e mensagem. As publicações são guardadas no MongoDB e apresentadas como texto simples. A lista usa um cursor baseado na data e no ID para continuar a paginação mesmo quando chegam novas publicações; a API continua a aceitar `offset` para clientes antigos. Ainda não existe edição nem eliminação na app. As animações das secções da conta e dos cartões respeitam a opção de movimento reduzido.
 
 ## PWA e ligação
 
 A app continua instalável, mas requer ligação ao servidor. O service worker de migração remove as caches antigas com prefixo `minha-pwa-v` e não interceta pedidos. Em instalações existentes, a limpeza só acontece quando o dispositivo estiver online e receber a atualização; outras caches não são afetadas. Na abertura, um splash verifica a sessão: se existir, encaminha diretamente para a conta; caso contrário, mostra as boas-vindas e o botão Continue. A transição para o login partilha o botão nos browsers compatíveis, com uma animação alternativa nos restantes e sem movimento quando o dispositivo o pede.
 
-A PWA pede orientação vertical; em dispositivos táteis que não respeitem esse pedido, uma mensagem pede para rodar o ecrã. O zoom é desativado através da configuração do viewport nos navegadores que o respeitam. Algumas plataformas ignoram estas restrições por motivos de acessibilidade e os conteúdos externos, como o GIAE, são controlados pelo respetivo site. Impedir o zoom também pode dificultar a utilização por pessoas com dificuldades visuais.
+A PWA pede orientação vertical; em dispositivos táteis que não respeitem esse pedido, uma mensagem pede para rodar o ecrã. O zoom continua disponível para facilitar a leitura; os conteúdos externos, como o GIAE, são controlados pelo respetivo site.
 
 ## Segurança da conta
 
@@ -44,7 +44,7 @@ Em User → Segurança, a password atual é necessária para desbloquear altera�
 
 ## Lunch e GIAE
 
-A aba Lunch tenta apresentar `https://giae.aeb.pt/` num painel incorporado; as opções **Recarregar GIAE** e **Abrir no navegador** estão sempre disponíveis nessa aba. Recarregar volta à página inicial do GIAE. O início de sessão é feito diretamente no GIAE: a SchoolCore não recolhe nem guarda as credenciais e não faz login automático. O painel mantém-se carregado ao trocar de aba, mas a sessão pode depender das regras do GIAE e do navegador, incluindo o bloqueio de cookies de terceiros. O painel não usa `sandbox`, pelo que o GIAE tem menos restrições e pode, por exemplo, tentar navegar a página principal; isto aumenta a confiança depositada nesse site. Se a incorporação ou o login falhar, usa o link externo. Terminar a sessão da SchoolCore não termina necessariamente a sessão do GIAE. A configuração de segurança permite incorporar apenas este domínio externo na página principal.
+Ao tocar em **Lunch**, `https://giae.aeb.pt/` abre numa nova aba ou no navegador, conforme o dispositivo. A SchoolCore mantém aberta a página anterior; ao fechar o GIAE ou regressar à app, podes continuar onde estavas, desde que o sistema não tenha descarregado a app. O início de sessão é feito diretamente no GIAE: a SchoolCore não recolhe nem guarda as credenciais e não faz login automático. A sessão depende das regras do GIAE e do navegador; terminar a sessão da SchoolCore não termina necessariamente a do GIAE.
 
 ## Desenvolvimento local
 
@@ -74,13 +74,13 @@ Contas antigas sem perfil ou estado são tratadas como alunos ativos; sem a marc
 
 ## Produção
 
-Esta é uma base de desenvolvimento, **não pronta para produção**. Antes de usar dados reais, configura HTTPS, `COOKIE_SECURE=true`, `APP_ORIGIN` com a origem HTTPS pública e MongoDB com autenticação e acesso restrito. Não exponhas o MongoDB publicamente. As novas sessões são guardadas no MongoDB e expiram 30 dias após o login; `GET /api/me` consulta a sessão e `POST /api/logout` termina-a.
+Esta é uma base de desenvolvimento, **não pronta para produção**. Antes de usar dados reais, configura HTTPS, `APP_ENV=production`, `COOKIE_SECURE=true`, `APP_ORIGIN` com a origem HTTPS pública e MongoDB com autenticação e acesso restrito. Com `APP_ENV=production`, o arranque recusa origens que não sejam HTTPS e cookies sem a opção segura; esta verificação não substitui uma revisão completa de segurança. Não exponhas o MongoDB publicamente. As novas sessões são guardadas no MongoDB e expiram 30 dias após o login; `GET /api/me` consulta a sessão e `POST /api/logout` termina-a.
 
 O login limita pedidos por endereço IP a 15 por janela fixa de 5 minutos, partilhados entre processos através do MongoDB. Isto inclui pedidos com sucesso; utilizadores atrás do mesmo IP partilham o limite. A proteção não impede ataques distribuídos nem substitui limitação no proxy/firewall. O servidor não confia em cabeçalhos de IP enviados pelo cliente; atrás de um proxy todos os pedidos poderão contar como o mesmo IP. Configura limitação por IP no proxy de confiança antes de colocar o serviço em produção.
 
 Uma credencial MongoDB esteve anteriormente no código e no histórico Git: **altera-a/revoga-a** e atualiza `MONGODB_URI` no `config/.env`. Remover a credencial do código não a remove do histórico. Por opção da aplicação, o login revela se um username pertence a uma conta desativada; isto facilita a enumeração de contas.
 
-Faltam ainda políticas de conta, recuperação de password, auditoria, backups, testes de segurança e carga e uma política CSP mais restritiva (atualmente são necessários scripts e estilos inline). Usa HTTPS também entre o proxy e o serviço quando apropriado. A instalação PWA e sessões persistentes dependem do navegador e das suas configurações.
+Faltam ainda políticas de conta, recuperação de password, auditoria, backups, testes de segurança e carga e uma revisão adicional da política CSP (ainda permite estilos inline). Usa HTTPS também entre o proxy e o serviço quando apropriado. A instalação PWA e sessões persistentes dependem do navegador e das suas configurações.
 
 ## Testes
 
@@ -88,7 +88,7 @@ Faltam ainda políticas de conta, recuperação de password, auditoria, backups,
 pip install -r requirements-test.txt
 python -m unittest discover -s tests
 # Opcional, com Node.js instalado: testes da PWA e interface
-node --test tests/test_service_worker.js tests/test_offline_ui.js tests/test_preferences_ui.js tests/test_navigation.js tests/test_security_ui.js tests/test_welcome_transition.js tests/test_refresh.js
+node --test tests/*.js
 ```
 
 ## Teste de carga local

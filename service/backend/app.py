@@ -10,18 +10,16 @@ app = FastAPI(title='SchoolCore', docs_url=None, redoc_url=None, openapi_url=Non
 @app.middleware('http')
 async def security_headers(request: Request, call_next):
     response = await call_next(request)
-    # Só a página principal incorpora o GIAE; as restantes aceitam frames da própria app.
-    frame_sources = "'self' https://giae.aeb.pt" if request.url.path == '/pages/start/HomePage.html' else "'self'"
     response.headers['X-Content-Type-Options'] = 'nosniff'
     response.headers['X-Frame-Options'] = 'SAMEORIGIN'
     # Same-origin requests retain their origin, without sending referrers to external sites.
     response.headers['Referrer-Policy'] = 'same-origin'
     response.headers['Permissions-Policy'] = 'camera=(), microphone=(), geolocation=()'
     response.headers['Content-Security-Policy'] = (
-        "default-src 'self'; script-src 'self' 'unsafe-inline'; "
+        "default-src 'self'; script-src 'self'; "
         "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
         "font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; "
-        f"connect-src 'self'; frame-src {frame_sources}; object-src 'none'; "
+        "connect-src 'self'; frame-src 'self'; object-src 'none'; "
         "base-uri 'self'; frame-ancestors 'self'; form-action 'self'"
     )
     if request.url.path.startswith('/api/'):

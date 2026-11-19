@@ -20,8 +20,13 @@ function setup() {
   const elements = {};
   const frame = elements['page-frame'] = new Element();
   frame.contentWindow = { location: { href: 'about:blank', pathname: 'blank' } };
+  const links = ['sinfo', 'bar', 'home', 'user'].map(page => {
+    const link = new Element();
+    link.dataset.page = page;
+    return link;
+  });
   const document = { handlers: {}, getElementById: id => elements[id] ||= new Element(),
-    querySelector: () => nav, querySelectorAll: () => [],
+    querySelector: () => nav, querySelectorAll: () => links,
     addEventListener(name, fn) { this.handlers[name] = fn; } };
   const window = { handlers: {}, reloads: 0, addEventListener(name, fn) { this.handlers[name] = fn; } };
   window.location = { reload() { window.reloads++; } };
@@ -30,7 +35,7 @@ function setup() {
   const location = { hash: '', origin: 'https://school.test' };
   vm.runInNewContext(source, { document, window, location, setTimeout, clearTimeout });
   const expire = delay => { for (const [id, timer] of [...timers]) if (timer.delay === delay) { timers.delete(id); timer.fn(); } };
-  return { nav, document, expire, frame, elements, window, location };
+  return { nav, document, expire, frame, elements, window, location, links };
 }
 test('navigation shrinks after three seconds and resets on activity', () => {
   const app = setup();
@@ -54,38 +59,24 @@ test('initial splash closes when the home frame loads', () => {
   app.frame.handlers.load();
   assert.equal(app.elements['home-splash'].hidden, true);
 });
-test('Lunch loads only the GIAE frame and keeps it when switching tabs', () => {
+test('internal navigation keeps the account active when returning from Lunch', () => {
   const app = setup();
-  const lunch = app.elements['lunch-frame'];
-  const panel = app.elements['lunch-panel'];
-  assert.equal(lunch.src, undefined);
-  app.location.hash = '#lunch';
-  app.window.handlers.hashchange();
-  assert.equal(panel.hidden, false);
-  assert.equal(app.frame.hidden, true);
-  assert.equal(lunch.src, 'https://giae.aeb.pt/');
-  assert.equal(app.elements.content.attributes['aria-busy'], 'false');
-  lunch.src = 'https://giae.aeb.pt/example-internal-page';
-  app.location.hash = '#user';
-  app.window.handlers.hashchange();
-  assert.equal(panel.hidden, true);
-  assert.equal(app.frame.hidden, false);
+  const user = app.links.find(link => link.dataset.page === 'user');
+  user.handlers.click();
   assert.equal(app.frame.src, './account.html?embedded=1');
-  app.location.hash = '#lunch';
-  app.window.handlers.hashchange();
-  assert.equal(panel.hidden, false);
-  assert.equal(lunch.src, 'https://giae.aeb.pt/example-internal-page');
+  assert.equal(user.attributes['aria-current'], 'page');
+  // The external link has no data-page and therefore no navigation handler.
+  assert.equal(app.links.some(link => link.dataset.page === 'lunch'), false);
+  app.window.handlers.pageshow?.({ persisted: true });
+  assert.equal(app.frame.src, './account.html?embedded=1');
+  assert.equal(user.attributes['aria-current'], 'page');
 });
-test('Lunch retry returns only the GIAE frame to its initial address', () => {
+test('legacy Lunch hashes do not open an external site automatically', () => {
   const app = setup();
   app.location.hash = '#lunch';
   app.window.handlers.hashchange();
-  const originalFrameSrc = app.frame.src;
-  app.elements['lunch-frame'].src = 'https://giae.aeb.pt/example-internal-page';
-  app.elements['lunch-retry'].handlers.click();
-  assert.equal(app.elements['lunch-frame'].src, 'https://giae.aeb.pt/');
-  assert.equal(app.frame.src, originalFrameSrc);
-  assert.equal(app.elements['lunch-panel'].hidden, false);
+  assert.equal(app.frame.src, undefined);
+  assert.equal(app.elements['lunch-frame'], undefined);
 });
 test('refresh messages only work from the active same-origin SchoolCore frame', () => {
   const app = setup();

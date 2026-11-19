@@ -7,7 +7,7 @@ const vm = require('node:vm');
 const source = fs.readFileSync(path.join(__dirname, '..', 'frontend', 'js', 'home-content.js'), 'utf8');
 const flush = () => new Promise(resolve => setImmediate(resolve));
 
-function setup({ role = 'admin', hour = 10, failPosts = false, initialPosts = [] } = {}) {
+function setup({ role = 'admin', hour = 10, failPosts = false, initialPosts = [], postError, legacyPosts = false } = {}) {
   const elements = {};
   const calls = [];
   const events = {};
@@ -45,16 +45,22 @@ function setup({ role = 'admin', hour = 10, failPosts = false, initialPosts = []
     calls.push({ url, options });
     if (url.endsWith('/api/me')) return { ok: true, status: 200, json: async () => ({ username: 'alex', first_name: 'Ana', role }) };
     if (options.method === 'POST') {
-      if (role !== 'admin') return { ok: false, status: 403 };
+      if (postError || role !== 'admin') return { ok: false, status: 403,
+        json: async () => ({ detail: postError || 'Administrator access required' }) };
       const post = { ...JSON.parse(options.body), id: String(posts.length + 1), author: 'alex', created_at: '2024-02-29T10:00:00Z' };
       posts.unshift(post);
       return { ok: true, status: 201, json: async () => post };
     }
     if (failPosts) return { ok: false, status: 503 };
     const params = new URLSearchParams(url.split('?')[1]);
-    const offset = Number(params.get('offset') || 0);
+    const cursor = params.get('cursor');
+    const offset = cursor ? posts.findIndex(post => post.id === cursor) + 1 : Number(params.get('offset') || 0);
     const limit = Number(params.get('limit'));
-    return { ok: true, status: 200, json: async () => ({ posts: posts.slice(offset, offset + limit), has_more: posts.length > offset + limit }) };
+    const hasMore = posts.length > offset + limit;
+    return { ok: true, status: 200, json: async () => ({
+      posts: posts.slice(offset, offset + limit), has_more: hasMore,
+      ...(legacyPosts ? {} : { next_cursor: hasMore ? posts[offset + limit - 1].id : null })
+    }) };
   };
   vm.runInNewContext(source, { document, window, fetch, Date: FixedDate, Intl, URLSearchParams });
   return { get, calls, events, posts, window };
@@ -108,6 +114,16 @@ test('non-admin users cannot see the creation form and a rejected request is rep
   assert.equal(app.posts.length, 0);
 });
 
+test('an origin rejection is not reported as an administrator restriction', async () => {
+  const app = setup({ postError: 'Invalid origin' });
+  await flush();
+  app.get('post-title').value = 'Notice';
+  app.get('post-body').value = 'Message';
+  await app.get('post-form').handlers.submit({ preventDefault() {} });
+  assert.match(app.get('post-form-status').textContent, /APP_ORIGIN/);
+  assert.equal(app.posts.length, 0);
+});
+
 test('post loading errors remain retryable without showing an empty success state', async () => {
   const app = setup({ failPosts: true });
   await flush();
@@ -127,9 +143,21 @@ test('the list can load all pages of posts', async () => {
   await flush();
   assert.equal(app.get('posts-list').children.length, 20);
   assert.equal(app.get('posts-more').hidden, false);
+  app.posts.unshift({ id: 'new', title: 'New post', body: 'Message', created_at: '2024-03-01T00:00:00Z' });
   await app.get('posts-more').handlers.click();
   assert.equal(app.get('posts-list').children.length, 23);
   assert.equal(app.get('posts-more').hidden, true);
+});
+
+test('pagination remains compatible with older servers', async () => {
+  const entries = Array.from({ length: 23 }, (_, i) => ({ id: String(i), title: `Post ${i}`, body: 'Message', created_at: '2024-02-29T10:00:00Z' }));
+  const app = setup({ initialPosts: entries, legacyPosts: true });
+  await flush();
+  app.get('open-posts').handlers.click();
+  await flush();
+  await app.get('posts-more').handlers.click();
+  assert.equal(app.get('posts-list').children.length, 23);
+  assert.ok(app.calls.some(call => call.url.includes('offset=20')));
 });
 
 test('posts without an author still display their date and content', async () => {

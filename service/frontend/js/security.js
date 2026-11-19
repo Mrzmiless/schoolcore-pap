@@ -34,6 +34,12 @@
   async function post(path, data) {
     return fetch('../../api/security/' + path, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
   }
+  async function forbiddenMessage(response) {
+    const data = await response.json().catch(() => ({}));
+    if (data.detail === 'Invalid origin') return 'The server rejected this address. Ask your administrator to check APP_ORIGIN.';
+    if (data.detail === 'Reauthentication required') return 'Acesso expirado. Confirma novamente a password.';
+    return 'Não foi possível verificar. Tenta novamente.';
+  }
   unlock.addEventListener('submit', async (event) => {
     event.preventDefault();
     const button = unlock.querySelector('button');
@@ -49,7 +55,10 @@
         return;
       }
       if (!response.ok) {
-        status.textContent = translate(response.status === 429 ? 'Demasiadas tentativas. Aguarda e tenta novamente.' : response.status === 401 ? 'Password incorreta ou sessão expirada.' : 'Não foi possível verificar. Tenta novamente.');
+        const message = response.status === 403 ? await forbiddenMessage(response)
+          : response.status === 429 ? 'Demasiadas tentativas. Aguarda e tenta novamente.'
+          : response.status === 401 ? 'Password incorreta ou sessão expirada.' : 'Não foi possível verificar. Tenta novamente.';
+        if (attempt === generation) status.textContent = translate(message);
         return;
       }
       unlocked = true;
@@ -67,7 +76,7 @@
     button.disabled = true;
     try {
       const response = await post('email', { email: email.value });
-      if (response.status === 403) { reset('Acesso expirado. Confirma novamente a password.'); return; }
+      if (response.status === 403) { reset(await forbiddenMessage(response)); return; }
       if (!response.ok) throw new Error();
       const data = await response.json();
       window.dispatchEvent(new CustomEvent('schoolcore:email-changed', { detail: data.email }));
@@ -84,7 +93,7 @@
     button.disabled = true;
     try {
       const response = await post('password', { password: password.value });
-      if (response.status === 403) { reset('Acesso expirado. Confirma novamente a password.'); return; }
+      if (response.status === 403) { reset(await forbiddenMessage(response)); return; }
       if (!response.ok) throw new Error();
       reset();
       (window.self !== window.top ? window.top : window).location.replace('/pages/login/index.html');

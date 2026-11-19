@@ -3,6 +3,7 @@ import secrets
 from datetime import datetime, timedelta, timezone
 
 from argon2.exceptions import InvalidHashError, VerificationError
+from bson import ObjectId
 from fastapi import APIRouter, HTTPException, Query, Request, Response
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 from pymongo.errors import PyMongoError
@@ -57,15 +58,45 @@ def public_post(post):
             'author': post.get('author'), 'created_at': created_at}
 
 
+def post_cursor(post):
+    date = post['created_at']
+    if date.tzinfo is None:
+        date = date.replace(tzinfo=timezone.utc)
+    return f'{date.astimezone(timezone.utc).isoformat()}~{post["_id"]}'
+
+
+def posts_before(cursor):
+    try:
+        date_text, post_id = cursor.split('~')
+        date = datetime.fromisoformat(date_text)
+        if date.tzinfo is None or not ObjectId.is_valid(post_id):
+            raise ValueError
+        date = date.astimezone(timezone.utc)
+    except (ValueError, OverflowError):
+        raise HTTPException(422, 'Invalid posts cursor')
+    return {'$or': [
+        {'created_at': {'$lt': date}},
+        {'created_at': date, '_id': {'$lt': ObjectId(post_id)}},
+    ]}
+
+
 @router.get('/api/posts')
-def list_posts(request: Request, offset: int = Query(default=0, ge=0), limit: int = Query(default=20, ge=1, le=50)):
+def list_posts(request: Request, offset: int = Query(default=0, ge=0),
+               limit: int = Query(default=20, ge=1, le=50),
+               cursor: str | None = Query(default=None, min_length=1, max_length=128)):
     current_user(request)
+    if cursor and offset:
+        raise HTTPException(422, 'Cannot combine cursor and offset')
+    query = posts_before(cursor) if cursor else None
     try:
         # Pedir mais um registo permite saber se há outra página sem contar a coleção inteira.
-        posts = list(db.posts.find().sort([('created_at', -1), ('_id', -1)]).skip(offset).limit(limit + 1))
+        results = db.posts.find(query) if query else db.posts.find()
+        posts = list(results.sort([('created_at', -1), ('_id', -1)]).skip(offset).limit(limit + 1))
     except PyMongoError:
         raise HTTPException(503, 'Database unavailable')
-    return {'posts': [public_post(post) for post in posts[:limit]], 'has_more': len(posts) > limit}
+    has_more = len(posts) > limit
+    return {'posts': [public_post(post) for post in posts[:limit]], 'has_more': has_more,
+            'next_cursor': post_cursor(posts[limit - 1]) if has_more else None}
 
 
 @router.post('/api/posts', status_code=201)

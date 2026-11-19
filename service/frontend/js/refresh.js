@@ -1,12 +1,6 @@
 // O gesto atua apenas em páginas da SchoolCore; iframes externos são independentes.
 (function () {
   const translate = (key) => window.schoolcoreI18n ? window.schoolcoreI18n.t(key) : key;
-  // Safari can ignore the viewport zoom setting; cancel its proprietary pinch gesture.
-  for (const name of ['gesturestart', 'gesturechange']) {
-    document.addEventListener(name, (event) => {
-      if (event.cancelable) event.preventDefault();
-    }, { passive: false });
-  }
   const threshold = 80;
   let startX = 0;
   let startY = 0;

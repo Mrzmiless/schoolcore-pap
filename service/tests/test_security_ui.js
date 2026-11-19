@@ -5,7 +5,7 @@ const path = require('node:path');
 const vm = require('node:vm');
 
 const source = fs.readFileSync(path.join(__dirname, '..', 'frontend', 'js', 'security.js'), 'utf8');
-function setup() {
+function setup(responses = []) {
   const elements = {};
   const requests = [];
   const timers = new Map();
@@ -22,6 +22,7 @@ function setup() {
     addEventListener(name, fn) { this.handlers[name] = fn; }, dispatchEvent() {}, confirm: () => true };
   const fetch = async (url, options) => {
     requests.push({ url, options });
+    if (responses.length) return responses.shift();
     return { ok: true, status: 200, json: async () => ({ email: 'new@example.test' }) };
   };
   const setTimeout = (fn, delay) => { const id = ++next; timers.set(id, { fn, delay }); return id; };
@@ -42,6 +43,20 @@ test('security opens after password and locks when section closes', async () => 
   app.get('security-section').handlers.toggle();
   assert.equal(app.get('security-controls').hidden, true);
   assert.match(app.requests.at(-1).url, /security\/lock$/);
+});
+
+test('security reports origin rejection separately from expired access', async () => {
+  for (const [detail, message] of [['Invalid origin', /APP_ORIGIN/], ['Reauthentication required', /expirado/]]) {
+    const app = setup([
+      { ok: true, status: 200 },
+      { ok: false, status: 403, json: async () => ({ detail }) }
+    ]);
+    app.get('security-section').open = true;
+    await app.submit('security-unlock-form');
+    await app.submit('security-email-form');
+    assert.match(app.get('security-status').textContent, message);
+    assert.equal(app.get('security-controls').hidden, true);
+  }
 });
 test('unlock expires and password confirmation prevents a mismatched change', async () => {
   const app = setup();

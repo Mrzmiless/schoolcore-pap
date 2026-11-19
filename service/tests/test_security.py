@@ -98,19 +98,25 @@ class SecurityTests(unittest.TestCase):
             self.assertEqual(client.get('/assets/css/missing.css').status_code, 404)
             self.assertEqual(client.get('/assets/js/missing.js').status_code, 404)
 
-    def test_only_home_csp_allows_the_specific_giae_frame(self):
+    def test_lunch_opens_external_browser_without_allowing_external_frames(self):
         with TestClient(launch.app) as client, \
              patch.object(pages, 'current_user', return_value={'is_first_login_done': True}):
             home = client.get('/pages/start/HomePage.html')
-            self.assertIn("frame-src 'self' https://giae.aeb.pt;", home.headers['content-security-policy'])
+            self.assertIn("frame-src 'self';", home.headers['content-security-policy'])
             self.assertIn('href="https://giae.aeb.pt/" target="_blank" rel="noopener noreferrer"', home.text)
-            self.assertIn('id="lunch-frame"', home.text)
-            self.assertIn('<iframe id="lunch-frame" title="GIAE — Lunch" referrerpolicy="no-referrer"></iframe>', home.text)
-            self.assertIn('referrerpolicy="no-referrer"', home.text)
+            self.assertNotIn('id="lunch-frame"', home.text)
+            self.assertNotIn('data-page="lunch"', home.text)
+            self.assertIn('<span class="sr-only">(nova janela)</span>', home.text)
             for path in ('/', '/pages/login/index.html', '/pages/start/account.html', '/api/me'):
                 response = client.get(path)
                 self.assertIn("frame-src 'self';", response.headers['content-security-policy'])
                 self.assertNotIn('giae.aeb.pt', response.headers['content-security-policy'])
+
+    def test_csp_disallows_inline_scripts(self):
+        with TestClient(launch.app) as client:
+            csp = client.get('/pages/login/index.html').headers['content-security-policy']
+            self.assertIn("script-src 'self';", csp)
+            self.assertNotIn("'unsafe-inline'", csp.split('script-src ', 1)[1].split(';', 1)[0])
 
     def test_legacy_public_urls_still_serve_their_resources(self):
         with TestClient(launch.app) as client:
@@ -136,8 +142,8 @@ class SecurityTests(unittest.TestCase):
             for path in paths:
                 with self.subTest(path=path):
                     response = client.get(path)
-                    self.assertIn('user-scalable=no', response.text)
-                    self.assertIn('maximum-scale=1', response.text)
+                    self.assertNotIn('user-scalable=no', response.text)
+                    self.assertNotIn('maximum-scale=1', response.text)
                     self.assertIn('assets/css/refresh.css', response.text)
                     self.assertIn('assets/js/refresh.js', response.text)
             css = client.get('/assets/css/refresh.css').text

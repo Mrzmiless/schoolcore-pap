@@ -10,6 +10,7 @@
   let latestState = 'loading';
   let latestGeneration = 0;
   let posts = [];
+  let nextCursor = null;
   let offset = 0;
   let hasMore = false;
   let listState = 'idle';
@@ -89,11 +90,13 @@
   async function loadPosts(reset = false) {
     if (listState === 'loading' && !reset) return;
     const generation = ++listGeneration;
-    if (reset) { posts = []; offset = 0; hasMore = false; }
+    if (reset) { posts = []; nextCursor = null; offset = 0; hasMore = false; }
     listState = 'loading';
     renderPosts();
     try {
-      const response = await fetch('../../api/posts?limit=20&offset=' + offset, { cache: 'no-store' });
+      // Compatibilidade com servidores antigos que ainda devolvem apenas has_more.
+      const query = nextCursor ? '&cursor=' + encodeURIComponent(nextCursor) : offset ? '&offset=' + offset : '';
+      const response = await fetch('../../api/posts?limit=20' + query, { cache: 'no-store' });
       if (authRedirect(response)) return;
       if (!response.ok) throw new Error('posts unavailable');
       const data = await response.json();
@@ -101,6 +104,7 @@
       // Evita duplicados se a lista mudar enquanto se carregam mais páginas.
       const known = new Set(posts.map(post => post.id));
       posts.push(...data.posts.filter(post => !known.has(post.id)));
+      nextCursor = data.next_cursor;
       offset += data.posts.length;
       hasMore = data.has_more;
       listState = 'ready';
@@ -146,7 +150,12 @@
       });
       if (authRedirect(response)) return;
       if (response.status === 403) {
-        formMessage = 'Only administrators can publish posts.';
+        const data = await response.json().catch(() => ({}));
+        formMessage = data.detail === 'Administrator access required'
+          ? 'Only administrators can publish posts.'
+          : data.detail === 'Invalid origin'
+          ? 'The server rejected this address. Ask your administrator to check APP_ORIGIN.'
+          : 'Could not publish. Please try again.';
       } else if (!response.ok) {
         formMessage = 'Could not publish. Please try again.';
       } else {

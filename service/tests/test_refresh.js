@@ -72,12 +72,10 @@ test('embedded pages request a refresh from their parent', () => {
   assert.deepEqual(app.messages, [{ type: 'schoolcore:refresh', origin: 'https://school.test' }]);
   assert.equal(app.reloads, 0);
 });
-test('Safari pinch gestures are cancelled when possible', () => {
+test('Safari pinch gestures are not blocked', () => {
   const app = setup();
   for (const name of ['gesturestart', 'gesturechange']) {
-    let prevented = false;
-    app.handlers[name]({ cancelable: true, preventDefault() { prevented = true; } });
-    assert.equal(prevented, true);
+    assert.equal(app.handlers[name], undefined);
   }
 });
 test('short, horizontal, scrolled, interactive and multitouch gestures do not refresh', () => {
