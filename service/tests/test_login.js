@@ -66,6 +66,7 @@ test('successful login verifies the session before navigating', async () => {
   const app = setup([200, 200]);
   await app.submit();
   assert.deepEqual(app.calls.map(call => call.url), ['../../api/login', '../../api/me']);
+  assert.equal(app.calls[0].options.referrerPolicy, 'same-origin');
   assert.deepEqual(app.navigations, ['../start/index.html']);
   assert.equal(app.form.password.value, '');
   assert.equal(app.timers.size, 0);

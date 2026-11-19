@@ -1,3 +1,4 @@
+/* Paleta partilhada; preferences.js escolhe as variantes através de data-* no HTML. */
 :root {
   touch-action: manipulation;
   color-scheme: dark;
@@ -31,6 +32,7 @@
   --sc-border: rgba(20,46,36,.32);
   --sc-focus: #17372c;
 }
+/* Easter egg para os píxeis AMOLED: hoje alguns podem finalmente descansar. */
 :root[data-theme="amoled"] {
   color-scheme: dark;
   --sc-background: #000;
@@ -53,6 +55,7 @@
 :root[data-text-size="large"] .navigation a,
 :root[data-text-size="large"] .navigation button { font-size: 13px; }
 :root[data-text-size="large"] .account-details dt { font-size: 1rem; }
+/* A escolha da conta também reduz movimento, independentemente do sistema. */
 :root[data-motion="reduced"] *,
 :root[data-motion="reduced"] *::before,
 :root[data-motion="reduced"] *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }

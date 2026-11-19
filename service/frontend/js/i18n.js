@@ -128,6 +128,11 @@
     ['A guardar…', 'Saving…', 'A guardar…'],
     ['Guardado.', 'Saved.', 'Guardado.'],
     ['Não foi possível guardar. Tenta novamente.', 'Could not save. Please try again.', 'Não foi possível guardar. Tenta novamente.'],
+    ['O servidor rejeitou este endereço. Verifica se APP_ORIGIN corresponde ao endereço da app.', 'The server rejected this address. Check that APP_ORIGIN matches the app address.', 'O servidor rejeitou este endereço. Verifica se APP_ORIGIN corresponde ao endereço da app.'],
+    ['O servidor recusou este pedido (403).', 'The server rejected this request (403).', 'O servidor recusou este pedido (403).'],
+    ['O servidor não aceitou os dados enviados (422).', 'The server did not accept the submitted data (422).', 'O servidor não aceitou os dados enviados (422).'],
+    ['O servidor ou a base de dados não está disponível. Tenta novamente.', 'The server or database is unavailable. Please try again.', 'O servidor ou a base de dados não está disponível. Tenta novamente.'],
+    ['Não foi possível concluir o pedido. Tenta novamente.', 'Could not complete the request. Please try again.', 'Não foi possível concluir o pedido. Tenta novamente.'],
     ['Não foi possível carregar as definições. Atualiza a página para tentar novamente.', 'Could not load settings. Refresh the page to try again.', 'Não foi possível carregar as definições. Atualiza a página para tentar novamente.'],
     ['Repor as definições da app?', 'Reset app settings?', 'Repor as definições da app?'],
     ['Could not load your account. Refresh the page to try again.', 'Could not load your account. Refresh the page to try again.', 'Não foi possível carregar a conta. Atualiza a página para tentar novamente.'],
@@ -194,6 +199,7 @@
     return value.replace(/\{(\w+)\}/g, (match, name) => Object.hasOwn(params, name) ? String(params[name]) : match);
   };
   function collect() {
+    // Registar apenas textos conhecidos evita traduzir publicações ou dados pessoais.
     const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
     while (walker.nextNode()) {
       const node = walker.currentNode;
@@ -213,6 +219,7 @@
     document.documentElement.lang = language;
     if (translations[titleKey]) document.title = t(titleKey);
     for (const item of textNodes) {
+      // Se outro código mudou o texto, não o substituímos por uma tradução antiga.
       if (item.node.nodeValue !== item.last) continue;
       item.last = item.original.replace(item.key, t(item.key));
       item.node.nodeValue = item.last;

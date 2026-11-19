@@ -42,6 +42,7 @@ def positive(value):
 
 
 def percentile(values, percent):
+    # Percentil por nearest-rank; não inventamos tempos entre pedidos.
     values = sorted(values)
     return values[max(0, math.ceil(len(values) * percent / 100) - 1)]
 
@@ -69,6 +70,7 @@ def simulate_user(base_url, username, password, expected_id, requests_per_user, 
             return None
 
     with httpx.Client(timeout=timeout, follow_redirects=False, trust_env=False) as client:
+        # Cada utilizador simulado tem o seu próprio cliente e, portanto, a sua sessão.
         response = request(client, 'POST', '/api/login', headers={'Origin': base_url},
                            json={'username': username, 'password': password})
         if response is None or response.status_code != 200:

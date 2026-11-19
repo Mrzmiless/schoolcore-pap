@@ -61,6 +61,7 @@ def public_post(post):
 def list_posts(request: Request, offset: int = Query(default=0, ge=0), limit: int = Query(default=20, ge=1, le=50)):
     current_user(request)
     try:
+        # Pedir mais um registo permite saber se há outra página sem contar a coleção inteira.
         posts = list(db.posts.find().sort([('created_at', -1), ('_id', -1)]).skip(offset).limit(limit + 1))
     except PyMongoError:
         raise HTTPException(503, 'Database unavailable')
@@ -71,6 +72,7 @@ def list_posts(request: Request, offset: int = Query(default=0, ge=0), limit: in
 def create_post(data: NewPost, request: Request):
     require_same_origin(request)
     user = current_user(request)
+    # A interface esconde o formulário, mas é o servidor que decide quem publica.
     if user.get('role', 'aluno') != 'admin':
         raise HTTPException(403, 'Administrator access required')
     post = {'title': data.title, 'body': data.body, 'author': user['username'],
@@ -86,6 +88,7 @@ def create_post(data: NewPost, request: Request):
 def login(credentials: Credentials, request: Request, response: Response):
     require_same_origin(request)
     try:
+        # Contabiliza todas as tentativas, incluindo as que têm sucesso.
         allowed, retry_after = check_login_rate(db.login_rate_limits, request.client.host if request.client else 'unknown')
         if not allowed:
             raise HTTPException(429, 'Too many login attempts', headers={'Retry-After': str(retry_after)})
@@ -102,6 +105,7 @@ def login(credentials: Credentials, request: Request, response: Response):
             raise HTTPException(401, 'Invalid credentials')
         if not account_allowed(user):
             raise HTTPException(401, 'Invalid credentials')
+        # O navegador guarda o token; a base de dados guarda apenas o respetivo hash.
         token = secrets.token_urlsafe(32)
         expires = datetime.now(timezone.utc) + timedelta(seconds=SESSION_SECONDS)
         db.sessions.insert_one({'_id': token_hash(token), 'user_id': user['_id'], 'expires_at': expires,
@@ -114,6 +118,7 @@ def login(credentials: Credentials, request: Request, response: Response):
 
 
 def security_session(request, user):
+    # Ter sessão iniciada não chega: alterações sensíveis exigem confirmação recente.
     token = request.cookies.get(COOKIE)
     now = datetime.now(timezone.utc)
     try:
@@ -185,6 +190,7 @@ def change_password(data: NewPassword, request: Request, response: Response):
     user = current_user(request)
     security_session(request, user)
     try:
+        # A versão de autenticação invalida as sessões antigas após a mudança.
         result = db.users.update_one({'_id': user['_id'], 'is_active': {'$ne': False},
                                       'password_hash': user['password_hash']},
                                      {'$set': {'password_hash': hasher.hash(data.password)},
@@ -222,15 +228,27 @@ def update_preferences(preferences: PreferencesUpdate, request: Request):
     values = preferences.model_dump(exclude_unset=True)
     if values.get('language', ...) is None:
         raise HTTPException(422, 'Invalid language')
+    query = {'_id': user['_id'], 'is_active': {'$ne': False}}
+    stored = user.get('preferences')
+    if 'preferences' in user and not isinstance(stored, dict):
+        # MongoDB cannot update a dotted field under a null or scalar value.
+        # Compare the old value so we do not overwrite a concurrent update.
+        query['preferences'] = {'$eq': stored}
+        changes = {'preferences': {**preferences_for(user).model_dump(), **values}}
+    else:
+        changes = {f'preferences.{key}': value for key, value in values.items()}
     try:
         result = db.users.update_one(
-            {'_id': user['_id'], 'is_active': {'$ne': False}},
-            {'$set': {f'preferences.{key}': value for key, value in values.items()}},
+            query,
+            {'$set': changes},
         )
     except PyMongoError:
         raise HTTPException(503, 'Database unavailable')
     if not result.matched_count:
+        if 'preferences' in query:
+            raise HTTPException(409, 'Preferences changed; try again')
         raise HTTPException(401, 'Invalid session')
+    # Um cliente antigo pode não enviar o idioma; preserva a escolha já guardada.
     existing = preferences_for(user).model_dump()
     return {**existing, **values}
 

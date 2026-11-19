@@ -39,6 +39,7 @@
     const isApi = url.origin === window.location.origin && url.pathname.startsWith('/api/');
     try {
       const response = await originalFetch.call(this, input, init);
+      // A notificação é informativa; quem chamou fetch continua a receber a resposta original.
       if (isApi && response.status >= 500) {
         showNotice('The server is unavailable or encountered an error. Please try again later.');
       } else if (isApi && response.ok && notice) {
@@ -93,6 +94,7 @@
   window.schoolcoreLoading = {
     show(message = 'Loading…') {
       if (!overlay) createOverlay();
+      // Identifica esta operação para uma anterior não esconder o ecrã por engano.
       generation++;
       startedAt = Date.now();
       previousFocus = document.activeElement;

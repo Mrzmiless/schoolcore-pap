@@ -21,7 +21,8 @@
         <h2 id="welcome">Welcome to SchoolCore</h2>
       </section>
       <section class="home-card posts-card" aria-labelledby="posts-heading">
-        <div class="card-heading"><h2 id="posts-heading">Posts</h2><span aria-hidden="true">↗</span></div>
+        <div class="card-heading"><h2 id="posts-heading">Posts</h2></div>
+        <!-- A publicação mais recente também abre a lista completa. -->
         <button id="open-posts" class="posts-preview" type="button">
           <span id="latest-title">Loading…</span>
           <span id="latest-body" class="preview-body"></span>
@@ -40,6 +41,7 @@
         <div id="calendar-days" class="calendar-grid"></div>
       </section>
     </div>
+    <!-- Vista separada para a lista e para o formulário visível aos administradores. -->
     <section id="posts-view" class="view" aria-labelledby="all-posts-title" hidden>
       <div class="posts-header">
         <button id="back-home" class="back-button" type="button" aria-label="Back to home">←</button>

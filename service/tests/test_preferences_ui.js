@@ -36,7 +36,7 @@ function setup() {
   };
   const fetch = (url, options) => {
     if (url.endsWith('/api/me')) return Promise.resolve({ ok: true, json: async () => ({ username: 'test', id: 'private-id', email: 'private@example.test', phone_number: '123456' }) });
-    return new Promise((resolve, reject) => requests.push({ payload: JSON.parse(options.body), resolve, reject }));
+    return new Promise((resolve, reject) => requests.push({ payload: JSON.parse(options.body), options, resolve, reject }));
   };
   const setTimeout = (callback, delay) => { const id = ++nextTimer; timers.set(id, { callback, delay }); return id; };
   const clearTimeout = id => timers.delete(id);
@@ -112,6 +112,7 @@ test('rapid preference changes are previewed and saved in order', async () => {
   app.get('preferences-form').handlers.change();
   assert.equal(app.requests.length, 1);
   assert.equal(app.requests[0].payload.theme, 'light');
+  assert.equal(app.requests[0].options.referrerPolicy, 'same-origin');
   app.get('setting-theme').value = 'amoled';
   app.get('preferences-form').handlers.change();
   assert.equal(app.requests.length, 1);
@@ -166,6 +167,31 @@ test('a delayed initial load does not overwrite a newer theme preview', async ()
   assert.equal(document.documentElement.dataset.theme, 'amoled');
   assert.equal(document.documentElement.dataset.blur, 'off');
   assert.equal(meta.content, '#000000');
+});
+
+test('an origin rejection explains the server configuration and restores preferences', async () => {
+  const app = setup();
+  await flush();
+  app.get('setting-theme').value = 'light';
+  app.get('preferences-form').handlers.change();
+  app.requests[0].resolve({ ok: false, status: 403, json: async () => ({ detail: 'Invalid origin' }) });
+  await flush();
+  assert.equal(app.get('setting-theme').value, 'normal');
+  assert.equal(app.previews.at(-1).theme, 'normal');
+  assert.match(app.get('preferences-status').textContent, /APP_ORIGIN/);
+});
+
+test('preference failures distinguish validation and server errors', async () => {
+  for (const [status, message] of [[422, /422/], [503, /base de dados/]]) {
+    const app = setup();
+    await flush();
+    app.get('setting-theme').value = 'light';
+    app.get('preferences-form').handlers.change();
+    app.requests[0].resolve({ ok: false, status });
+    await flush();
+    assert.equal(app.get('setting-theme').value, 'normal');
+    assert.match(app.get('preferences-status').textContent, message);
+  }
 });
 
 test('language changes are saved and failed changes restore the saved language', async () => {

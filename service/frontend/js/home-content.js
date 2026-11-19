@@ -48,6 +48,7 @@
       const card = document.createElement('article');
       card.className = 'home-card post-card';
       const title = document.createElement('h3');
+      // Publicações são texto, não HTML: nada de truques mágicos no título.
       title.textContent = post.title;
       const meta = document.createElement('p');
       meta.className = 'post-meta';
@@ -66,6 +67,7 @@
     $('post-form-status').textContent = formMessage ? t(formMessage) : '';
   }
   async function loadLatest() {
+    // Respostas antigas não devem substituir uma publicação mais recente.
     const generation = ++latestGeneration;
     latestState = 'loading';
     renderLatest();
@@ -96,6 +98,7 @@
       if (!response.ok) throw new Error('posts unavailable');
       const data = await response.json();
       if (generation !== listGeneration) return;
+      // Evita duplicados se a lista mudar enquanto se carregam mais páginas.
       const known = new Set(posts.map(post => post.id));
       posts.push(...data.posts.filter(post => !known.has(post.id)));
       offset += data.posts.length;
@@ -179,6 +182,7 @@
       label.textContent = weekdayFormatter.format(new Date(2024, 0, 1 + i));
       weekdays.appendChild(label);
     }
+    // JavaScript começa ao domingo; o calendário começa à segunda. A semana tem regras.
     const firstDay = (new Date(year, month, 1).getDay() + 6) % 7;
     const lastDate = new Date(year, month + 1, 0).getDate();
     for (let i = 0; i < firstDay; i++) days.appendChild(document.createElement('span'));

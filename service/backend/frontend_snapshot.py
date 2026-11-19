@@ -11,12 +11,14 @@ class FrontendSnapshot:
     def __init__(self, base=BASE):
         root = (base / 'frontend').resolve()
         self.files = {}
+        # Uma fotografia, não um vídeo: alterações no disco exigem reiniciar o servidor.
         for folder in ('html', 'css', 'js', 'pwa', 'assets'):
             directory = root / folder
             allowed_root = directory.resolve()
             if not allowed_root.is_relative_to(root):
                 continue
             for path in directory.rglob('*'):
+                # Não seguir links que saiam do diretório público.
                 if path.is_file() and path.resolve().is_relative_to(allowed_root):
                     self.files[path.relative_to(root).as_posix()] = path.read_bytes()
 

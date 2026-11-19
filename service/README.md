@@ -44,7 +44,7 @@ Em User → Segurança, a password atual é necessária para desbloquear altera�
 
 ## Lunch e GIAE
 
-A aba Lunch tenta apresentar `https://giae.aeb.pt/` num painel incorporado; as opções **Recarregar GIAE** e **Abrir no navegador** estão sempre disponíveis nessa aba. Recarregar volta à página inicial do GIAE. O início de sessão é feito diretamente no GIAE: a SchoolCore não recolhe nem guarda as credenciais e não faz login automático. O painel mantém-se carregado ao trocar de aba, mas a sessão pode depender das regras do GIAE e do navegador, incluindo o bloqueio de cookies de terceiros. Se a incorporação ou o login falhar, usa o link externo. Terminar a sessão da SchoolCore não termina necessariamente a sessão do GIAE. A configuração de segurança permite incorporar apenas este domínio externo na página principal.
+A aba Lunch tenta apresentar `https://giae.aeb.pt/` num painel incorporado; as opções **Recarregar GIAE** e **Abrir no navegador** estão sempre disponíveis nessa aba. Recarregar volta à página inicial do GIAE. O início de sessão é feito diretamente no GIAE: a SchoolCore não recolhe nem guarda as credenciais e não faz login automático. O painel mantém-se carregado ao trocar de aba, mas a sessão pode depender das regras do GIAE e do navegador, incluindo o bloqueio de cookies de terceiros. O painel não usa `sandbox`, pelo que o GIAE tem menos restrições e pode, por exemplo, tentar navegar a página principal; isto aumenta a confiança depositada nesse site. Se a incorporação ou o login falhar, usa o link externo. Terminar a sessão da SchoolCore não termina necessariamente a sessão do GIAE. A configuração de segurança permite incorporar apenas este domínio externo na página principal.
 
 ## Desenvolvimento local
 

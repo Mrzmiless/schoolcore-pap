@@ -12,6 +12,7 @@
         window.matchMedia('(prefers-reduced-motion: reduce)').matches;
       if (reduced || typeof section.animate !== 'function') return;
       event.preventDefault();
+      // Cliques rápidos não devem deixar uma animação antiga a mandar na secção.
       if (animation) {
         animation.cancel();
         section.style.overflow = originalOverflow;

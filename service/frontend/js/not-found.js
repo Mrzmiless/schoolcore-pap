@@ -1,3 +1,4 @@
+// Apenas nomes conhecidos são apresentados a partir do parâmetro do URL.
 const names = { sinfo: 'School Info', bar: 'Bar', lunch: 'Lunch' };
 const page = new URLSearchParams(location.search).get('page');
 function renderMessage() {

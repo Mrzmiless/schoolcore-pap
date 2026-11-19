@@ -17,6 +17,7 @@ button { font: inherit; cursor: pointer; }
 button:focus-visible, input:focus-visible, textarea:focus-visible { outline: 3px solid var(--sc-focus); outline-offset: 3px; }
 .posts-preview { display: grid; gap: 8px; width: 100%; padding: 0; border: 0; background: transparent; color: var(--sc-text); text-align: left; }
 #latest-title { font-weight: 700; font-size: 16px; }
+/* A pré-visualização é curta; a publicação completa continua disponível na lista. */
 .preview-body { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; white-space: pre-wrap; font-size: 13px; line-height: 1.5; }
 .preview-action { margin-top: 6px; color: var(--sc-accent); font-size: 12px; font-weight: 700; }
 .post-meta { font-size: 12px; opacity: .75; }
@@ -39,6 +40,7 @@ button:focus-visible, input:focus-visible, textarea:focus-visible { outline: 3px
 .action-button:disabled { opacity: .6; cursor: wait; }
 #posts-status, #post-form-status { font-size: 13px; }
 #post-form-status:empty, #posts-status:empty { display: none; }
+/* Não obrigar ninguém a ver uma animação para consultar os posts. */
 @media (prefers-reduced-motion: no-preference) {
   .view:not([hidden]) { animation: home-enter .2s ease-out both; }
   .home-card, .action-button, .calendar-heading button, .back-button { transition: filter .15s ease, transform .15s ease; }

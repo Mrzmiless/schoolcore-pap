@@ -7,6 +7,7 @@ BASE = Path(__file__).resolve().parent.parent
 def environment_path(base=BASE):
     current = base / 'config' / '.env'
     legacy = base / '.env'
+    # Dois ficheiros poderiam apontar para bases diferentes: não adivinhar qual usar.
     if current.exists() and legacy.exists():
         raise RuntimeError('Existem dois ficheiros .env: escolhe apenas config/.env ou o antigo .env.')
     return legacy if legacy.exists() else current

@@ -18,6 +18,7 @@ def main():
     parser.add_argument('command', choices=['serve', 'create-user'], nargs='?', default='serve')
     args = parser.parse_args()
     if args.command == 'create-user':
+        # Recolher e validar os dados antes de escrever qualquer coisa na base.
         username = input('Username: ').strip()
         first_name = input('Primeiro nome: ').strip()
         last_name = input('Apelido: ').strip()
@@ -60,6 +61,7 @@ def main():
             parser.error('Não foi possível ligar ao MongoDB.')
         print('Utilizador criado.')
     else:
+        # Falhar logo no arranque evita anunciar uma app sem base de dados acessível.
         try:
             ensure_indexes()
         except PyMongoError:

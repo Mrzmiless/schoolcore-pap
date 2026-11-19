@@ -30,6 +30,7 @@ complete.addEventListener('click', async () => {
   complete.disabled = true;
   window.schoolcoreLoading.show(translate('Saving…'));
   try {
+    // A introdução só fica concluída depois de o servidor confirmar a gravação.
     const response = await fetch('../../api/onboarding/complete', { method: 'POST' });
     if (response.status === 401) { await window.schoolcoreLoading.wait(); window.location.replace('../login/index.html'); return; }
     if (!response.ok) throw new Error();

@@ -23,6 +23,7 @@
     <h1 id="page-title">Home</h1>
   </header>
   <main class="content is-loading" id="content" aria-busy="true">
+    <!-- As páginas da SchoolCore partilham este painel; o GIAE tem um iframe separado. -->
     <iframe id="page-frame" title="Home" src="./home-content.html"></iframe>
     <div class="content-loading" id="content-loading" role="status">Loading…</div>
     <section id="lunch-panel" class="lunch-panel" aria-label="GIAE — Lunch" hidden>
@@ -33,7 +34,7 @@
           <a href="https://giae.aeb.pt/" target="_blank" rel="noopener noreferrer">Abrir no navegador <span class="sr-only">(nova janela)</span></a>
         </div>
       </div>
-      <iframe id="lunch-frame" title="GIAE — Lunch" referrerpolicy="no-referrer" sandbox="allow-forms allow-scripts allow-same-origin allow-popups allow-downloads"></iframe>
+      <iframe id="lunch-frame" title="GIAE — Lunch" referrerpolicy="no-referrer"></iframe>
     </section>
   </main>
   <div class="nav-area"><nav class="navigation" aria-label="Main navigation">

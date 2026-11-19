@@ -9,6 +9,7 @@ let savedPreferences;
 let desiredPreferences;
 let savingPreferences = false;
 
+// Só uma secção da conta fica aberta de cada vez.
 sections.forEach((section) => {
   section.addEventListener('toggle', () => {
     if (section.open) sections.forEach((other) => { if (other !== section) other.open = false; });
@@ -25,6 +26,7 @@ function showPreferences(preferences) {
 
 function previewPreferences(preferences) {
   const value = window.schoolcorePreferences.apply(preferences);
+  // A página principal também precisa de acompanhar o tema enquanto a conta está no iframe.
   if (window.parent !== window) {
     window.parent.postMessage({ type: 'schoolcore:preferences', preferences: value }, location.origin);
   }
@@ -45,10 +47,25 @@ function samePreferences(left, right) {
     left.motion === right.motion && left.text_size === right.text_size && left.language === right.language;
 }
 
+async function accountRequestError(response) {
+  if (response.status === 403) {
+    const data = await response.json().catch(() => ({}));
+    if (data.detail === 'Invalid origin') {
+      return 'O servidor rejeitou este endereço. Verifica se APP_ORIGIN corresponde ao endereço da app.';
+    }
+    return 'O servidor recusou este pedido (403).';
+  }
+  if (response.status === 422) return 'O servidor não aceitou os dados enviados (422).';
+  if (response.status >= 500) return 'O servidor ou a base de dados não está disponível. Tenta novamente.';
+  return 'Não foi possível concluir o pedido. Tenta novamente.';
+}
+
 async function savePreferences() {
   if (savingPreferences) return;
   savingPreferences = true;
+  let failureMessage;
   try {
+    // Serializa alterações rápidas: a última escolha não fica presa atrás da primeira.
     while (!samePreferences(savedPreferences, desiredPreferences)) {
       const sent = { ...desiredPreferences };
       preferencesStatus.textContent = translate('A guardar…');
@@ -56,21 +73,27 @@ async function savePreferences() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(sent),
+        // Preserve the origin for the server's CSRF check on mobile browsers.
+        referrerPolicy: 'same-origin',
         keepalive: true
       });
       if (response.status === 401) {
         (window.self !== window.top ? window.top : window).location.replace('../login/index.html');
         return;
       }
-      if (!response.ok) throw new Error('Could not save preferences');
+      if (!response.ok) {
+        failureMessage = await accountRequestError(response);
+        throw new Error('Preference save failed');
+      }
       savedPreferences = await response.json();
     }
     preferencesStatus.textContent = translate('Guardado.');
   } catch (error) {
+    // Uma pré-visualização não é uma gravação: repor a última versão confirmada.
     desiredPreferences = { ...savedPreferences };
     showPreferences(desiredPreferences);
     previewPreferences(desiredPreferences);
-    preferencesStatus.textContent = translate('Não foi possível guardar. Tenta novamente.');
+    preferencesStatus.textContent = translate(failureMessage || 'Não foi possível guardar. Tenta novamente.');
   } finally {
     savingPreferences = false;
   }
@@ -107,6 +130,7 @@ function displayValue(id, value) {
 }
 
 const privateValues = {};
+// O blur evita olhares curiosos, não substitui permissões ou autenticação.
 for (const [key, label] of [['id', 'account ID'], ['email', 'email'], ['phone', 'phone number']]) {
   const button = document.getElementById('reveal-' + key);
   const field = document.getElementById('private-' + key);
@@ -169,6 +193,7 @@ async function loadUser() {
     const user = await response.json();
     loadedUser = user;
     renderUser(user);
+    // Só inserir os valores privados no DOM quando a pessoa escolher revelá-los.
     privateValues.id = user.id;
     privateValues.email = user.email;
     privateValues.phone = user.phone_number;
@@ -183,13 +208,17 @@ document.getElementById('logout').addEventListener('click', async (event) => {
   const button = event.currentTarget;
   button.disabled = true;
   window.schoolcoreLoading.show(translate('Signing out...'));
+  let failureMessage;
   try {
     const response = await fetch('../../api/logout', { method: 'POST' });
-    if (!response.ok) throw new Error();
+    if (!response.ok) {
+      failureMessage = await accountRequestError(response);
+      throw new Error('Sign out failed');
+    }
     await window.schoolcoreLoading.wait();
     (window.self !== window.top ? window.top : window).location.replace('../login/index.html');
   } catch (error) {
-    status.textContent = translate('Could not sign out. Please try again.');
+    status.textContent = translate(failureMessage || 'Could not sign out. Please try again.');
     await window.schoolcoreLoading.hide();
     button.disabled = false;
   }

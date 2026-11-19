@@ -18,6 +18,7 @@
   let label;
 
   function atTop(target) {
+    // Verificar também painéis internos com scroll, não apenas a página inteira.
     if ((window.scrollY || document.documentElement.scrollTop || document.body.scrollTop || 0) > 0) return false;
     let node = target instanceof Element ? target : target.parentElement;
     while (node && node !== document.body && node !== document.documentElement) {
@@ -55,6 +56,7 @@
     if (refreshing) return;
     if (event.touches.length !== 1 || !atTop(event.target)) { reset(); return; }
     const target = event.target instanceof Element ? event.target : event.target.parentElement;
+    // Um toque num formulário não é um pedido secreto para atualizar a página.
     if (target && target.closest('input, textarea, select, button, a, [contenteditable="true"], [role="dialog"]')) return;
     startX = event.touches[0].clientX;
     startY = event.touches[0].clientY;

@@ -61,6 +61,7 @@ if ('serviceWorker' in navigator) {
 
   const continueLink = document.querySelector('.continuar');
   continueLink.addEventListener('click', (event) => {
+    // Usar a transição nativa quando existe; a animação alternativa é opcional.
     const crossDocumentTransitions = 'onpageswap' in window && 'onpagereveal' in window &&
       window.CSS && window.CSS.supports('view-transition-name', 'auth-button');
     if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey ||
@@ -174,6 +175,7 @@ if ('serviceWorker' in navigator) {
   });
 
   window.addEventListener('beforeinstallprompt', (event) => {
+    // Guardar o convite do navegador para o botão de instalação o poder usar depois.
     event.preventDefault();
     deferredPrompt = event;
     if (shown) render();

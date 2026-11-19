@@ -14,6 +14,7 @@ hasher = PasswordHasher()
 
 
 def token_hash(token):
+    # Se a coleção de sessões for lida, os tokens reais não ficam lá em texto simples.
     return hashlib.sha256(token.encode()).hexdigest()
 
 
@@ -29,6 +30,7 @@ def current_user(request):
         user = db.users.find_one({'_id': session['user_id']}) if session else None
     except PyMongoError:
         raise HTTPException(503, 'Database unavailable')
+    # Conta desativada ou versão antiga: a sessão deixa de dar acesso imediatamente.
     if (not account_allowed(user) or
             session.get('auth_version', 0) != user.get('auth_version', 0)):
         raise HTTPException(401, 'Invalid session')
@@ -36,6 +38,7 @@ def current_user(request):
 
 
 def require_same_origin(request: Request):
+    # Proteção contra pedidos de outras origens; APP_ORIGIN inclui esquema e porta.
     origin = request.headers.get('origin')
     expected = os.getenv('APP_ORIGIN')
     if not origin or (expected and origin.rstrip('/') != expected.rstrip('/')):

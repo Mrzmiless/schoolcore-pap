@@ -6,6 +6,7 @@ from .auth import current_user
 from .frontend_snapshot import frontend
 
 router = APIRouter()
+# Lista explícita: nem tudo o que vive no disco tem bilhete para a internet.
 PUBLIC_FILES = {
     'index.html': 'html/index.html',
     'sw.js': 'pwa/sw.js',
@@ -45,6 +46,7 @@ def start_page(request: Request):
 
 
 def authenticated_start_page(request: Request, filename: str):
+    # A introdução deve estar concluída antes de abrir as páginas principais.
     try:
         user = current_user(request)
     except HTTPException as error:

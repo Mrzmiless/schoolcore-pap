@@ -13,6 +13,7 @@
   let generation = 0;
 
   function reset(message = '') {
+    // Invalida respostas atrasadas e limpa passwords dos campos.
     generation++;
     clearTimeout(timer);
     unlocked = false;
@@ -24,6 +25,7 @@
   function lock() {
     const wasUnlocked = unlocked;
     reset();
+    // Mesmo se este pedido falhar, o servidor limita a duração do desbloqueio.
     if (wasUnlocked) fetch('../../api/security/lock', { method: 'POST', keepalive: true }).catch(() => {});
   }
   section.addEventListener('toggle', () => { if (!section.open) lock(); });
@@ -41,6 +43,7 @@
     try {
       const response = await post('unlock', { password: current.value });
       current.value = '';
+      // A secção pode ter sido fechada enquanto o servidor verificava a password.
       if (attempt !== generation || !section.open) {
         if (response.ok) fetch('../../api/security/lock', { method: 'POST', keepalive: true }).catch(() => {});
         return;

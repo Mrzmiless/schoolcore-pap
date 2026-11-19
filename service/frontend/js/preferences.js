@@ -19,6 +19,7 @@
     const preferences = normalize(value);
     current = preferences;
     revision++;
+    // Os atributos são a ponte entre as escolhas da conta e as variáveis CSS.
     const root = document.documentElement;
     root.dataset.theme = preferences.theme;
     root.dataset.blur = preferences.navbar_blur ? 'on' : 'off';
@@ -31,6 +32,7 @@
   }
 
   const initialRevision = revision;
+  // Só aceitamos mensagens da janela-mãe da mesma origem.
   window.addEventListener('message', (event) => {
     if (window.parent === window || event.source !== window.parent || event.origin !== window.location.origin ||
         !event.data || event.data.type !== 'schoolcore:preferences') return;
@@ -43,6 +45,7 @@
     })
     .then(value => {
       const preferences = normalize(value);
+      // Uma resposta lenta não pode apagar uma pré-visualização mais recente.
       if (revision === initialRevision) apply(preferences);
       return preferences;
     })

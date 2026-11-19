@@ -105,7 +105,7 @@ class SecurityTests(unittest.TestCase):
             self.assertIn("frame-src 'self' https://giae.aeb.pt;", home.headers['content-security-policy'])
             self.assertIn('href="https://giae.aeb.pt/" target="_blank" rel="noopener noreferrer"', home.text)
             self.assertIn('id="lunch-frame"', home.text)
-            self.assertIn('sandbox="allow-forms allow-scripts allow-same-origin', home.text)
+            self.assertIn('<iframe id="lunch-frame" title="GIAE — Lunch" referrerpolicy="no-referrer"></iframe>', home.text)
             self.assertIn('referrerpolicy="no-referrer"', home.text)
             for path in ('/', '/pages/login/index.html', '/pages/start/account.html', '/api/me'):
                 response = client.get(path)

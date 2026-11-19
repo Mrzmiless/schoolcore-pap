@@ -64,6 +64,7 @@ function navigate(page) {
     else link.removeAttribute('aria-current');
   });
   content.classList.remove('has-error');
+  // O GIAE conserva o seu próprio iframe ao mudar de separador.
   if (page === 'lunch') {
     content.classList.remove('is-loading');
     content.setAttribute('aria-busy', 'false');
@@ -95,6 +96,7 @@ function frameLoaded() {
       return;
     }
   } catch (error) { /* The iframe may be inaccessible during navigation. */ }
+  // Um iframe recém-aberto recebe o tema atual, sem esperar por outro pedido.
   const preferences = window.schoolcorePreferences?.current?.();
   if (preferences && frame.contentWindow) {
     frame.contentWindow.postMessage({ type: 'schoolcore:preferences', preferences }, location.origin);
@@ -124,6 +126,7 @@ function pageFromHash() {
 }
 window.addEventListener('hashchange', () => navigate(pageFromHash()));
 window.addEventListener('message', (event) => {
+  // Só o iframe ativo e da mesma origem pode falar com esta navegação.
   if (event.origin !== location.origin || event.source !== frame.contentWindow || !event.data) return;
   if (event.data.type === 'schoolcore:refresh') { window.location.reload(); return; }
   if (event.data.type === 'schoolcore:navigate' && event.data.page === 'user') location.hash = 'user';

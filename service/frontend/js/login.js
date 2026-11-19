@@ -19,6 +19,7 @@ window.addEventListener('pageshow', (event) => {
 });
 
 async function loginRequest(url, options = {}) {
+  // Não deixar o botão de login à espera para sempre de uma rede perdida.
   const controller = new AbortController();
   const timeout = window.setTimeout(() => controller.abort(), 15000);
   try {
@@ -43,10 +44,12 @@ document.getElementById('login-form').addEventListener('submit', async (event) =
     const response = await loginRequest('../../api/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username: form.username.value, password: form.password.value })
+      body: JSON.stringify({ username: form.username.value, password: form.password.value }),
+      referrerPolicy: 'same-origin'
     });
     if (response.ok) {
       form.password.value = '';
+      // Confirmar que o navegador aceitou o cookie antes de avançar.
       const session = await loginRequest('../../api/me', { cache: 'no-store' });
       if (session.ok) {
         status.textContent = translate('Signed in. Opening the home page…');
